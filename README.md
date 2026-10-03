@@ -105,4 +105,4 @@ python -m pytest -q
 
 repository 設定的 **Settings → Pages → Build and deployment → Source** 使用 **GitHub Actions**。公開網站與輸出行情皆可供任何人查看；來源紀錄不包含離線輸入的本機路徑。部署只發布 `public/` 成品，不發布開發環境、快取或 `.env`。
 
-Actions 使用固定 commit 的官方 action；建置只有讀取 repository 權限，部署 job 才取得 Pages 發布及 OIDC 權限。不要把私人持倉或個資放入自訂清單或報表。
+Actions 使用固定 commit 的官方 action；建置取得 repository 讀取及 Pages 啟用權限，部署 job 取得 Pages 發布及 OIDC 權限。不要把私人持倉或個資放入自訂清單或報表。

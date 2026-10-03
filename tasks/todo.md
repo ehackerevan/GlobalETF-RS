@@ -21,7 +21,10 @@ HTML 驗證：24 項測試通過；Chromium 桌面 1440px／手機 390px 檢查�
 
 - [x] 移除公開來源紀錄的完整本機路徑並驗證。
 - [x] 固定 Actions 版本，以美股收盤後排程執行測試、掃描與 Pages 發布。
-- [ ] 建立獨立公開 repository，推送程式並設定 Pages。
+- [x] 確認獨立公開 repository 可存取，並推送程式。
+- [ ] 帳號端啟用 Pages（Source：GitHub Actions）。
 - [ ] 驗證第一次 Actions 與公開網站。
 
 部署阻擋：GitHub gh 已確認登入 ehackerevan；新建 ehackerevan/GlobalETF-RS 被 GitHub 回覆 `Resource not accessible by integration (createRepository)`。尚未建立遠端、未推送、未啟用 Pages；等待使用者建立並授權空白 repository。25 項測試與 diff 檢查通過。
+
+接續部署：已確認 ehackerevan/GlobalETF-RS 為空白公開 repository，透過 GitHub API 推送。第一次 Actions run 37091172258：25 項測試通過，2026-10-02 行情 89 檔排名、0 檔排除；Pages 啟用被 API 與 workflow 回覆 403。等待帳號端設定 Pages Source，再重跑發布。
