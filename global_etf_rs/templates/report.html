@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全球 ETF RS｜{{DATE}}</title>
+<style>
+:root{--ink:#172b46;--muted:#52657c;--blue:#285ea8;--orange:#c76c23;--line:#dfe7f0}
+*{box-sizing:border-box}body{font:16px system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:#f3f6fa;color:var(--ink)}
+main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)}footer{color:var(--muted);font-size:13px;margin-top:24px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}main{padding:20px 12px}.panel{padding:14px}.controls label{max-width:100%}.chart{min-height:300px}}
+@media print{body{background:white}.controls,.modebar{display:none}.table-wrap,.scroll-chart{max-height:none}.panel{break-inside:avoid}}
+</style>
+<script>{{PLOTLY}}</script>
+</head>
+<body><main>
+<header><div class="eyebrow">GLOBAL ETF · RELATIVE STRENGTH</div>
+<h1>全球跨資產 ETF 相對強度</h1>
+<p class="meta">基準 SPY · 完整收盤日 {{DATE}} · 合格 ETF {{UNIVERSE_COUNT}} 檔 · 排除 {{EXCLUDED_COUNT}} 檔</p>
+<p class="note">以美元配息／拆分調整行情比較。RS 分數大於 0 代表加權期間跑贏 SPY；PR 表示 ETF 母體內的排名，兩者分開閱讀。</p></header>
+<div class="controls panel" aria-label="報表篩選">
+<label>分類 <select id="category"><option value="">全部分類</option>{{OPTIONS}}</select></label>
+<label>搜尋 <input type="search" id="search" placeholder="代碼、名稱或曝險"></label>
+<label><input type="checkbox" id="strong"> 只看加權跑贏 SPY</label>
+<label>圖表排序 <select id="order"><option value="top">最強優先</option><option value="bottom">最弱優先</option></select></label>
+<label>圖表檔數 <select id="limit"><option value="15">15 檔</option><option value="30">30 檔</option><option value="all">全部</option></select></label>
+</div>
+<noscript>請啟用 JavaScript 查看互動圖表。下方資料表仍可閱讀。</noscript>
+<div class="cards" aria-live="polite">
+<div class="card"><span>目前篩選 ETF</span><strong id="count">—</strong><small>SPY 不計入</small></div>
+<div class="card"><span>加權跑贏 SPY</span><strong id="positive">—</strong><small id="positive-note">—</small></div>
+<div class="card"><span>RS 分數中位數</span><strong id="median">—</strong><small>目前篩選母體</small></div>
+<div class="card"><span>篩選中最強 ETF</span><strong id="leader">—</strong><small id="leader-note">—</small></div>
+</div>
+<div class="grid">
+<section class="panel"><h2>ETF 加權 RS 排名</h2><p class="caption" id="ranking-caption"></p><div class="legend"><span><i class="swatch" style="background:#285ea8"></i>正分數</span><span><i class="swatch" style="background:#c76c23"></i>負分數</span><span>0 為 SPY 基準</span></div><div class="scroll-chart"><div id="ranking-chart" class="chart" role="img" aria-label="ETF 加權相對強度排名長條圖"></div></div></section>
+<section class="panel"><h2>分類強度比較</h2><p class="caption">目前篩選結果的 RS 分數中位數；標示每類 ETF 檔數，非資產類別指數報酬。</p><div id="category-chart" class="chart" role="img" aria-label="分類 RS 中位數長條圖"></div></section>
+</div>
+<section class="panel wide"><h2>各期間相對 SPY 報酬</h2><p class="caption" id="heatmap-caption"></p><div class="legend" id="heatmap-scale"></div><div class="scroll-chart"><div id="heatmap-chart" class="chart" role="img" aria-label="ETF 各期間相對 SPY 報酬熱力圖"></div></div></section>
+<section class="panel"><h2>一年相對強度走勢</h2><label>選擇標的 <select id="ticker"></select></label><p class="caption">ETF 調整價格 ÷ SPY 調整價格，起點正規化為 100。高於 100 表示從起點至當日跑贏 SPY；不是 ETF 價格或加權 RS 分數。</p><div id="trend-chart" class="chart" role="img" aria-label="一年相對 SPY 強度走勢"></div></section>
+<section class="panel"><h2>完整排名資料</h2><p class="caption">表格顯示全部符合篩選的標的，圖表檔數不限制表格。PR 依原始合格母體計算，篩選後不重算；SPY 參考列保持顯示。</p><div class="table-wrap">{{TABLE}}</div></section>
+<section class="panel"><details><summary>計算方法與資料限制</summary>
+<p class="note">相對 N 日報酬＝(ETF 今日／ETF N 日前) ÷ (SPY 今日／SPY N 日前) − 1。加權 RS 分數＝相對 63／126／189／252 交易日報酬分別以 40%／20%／20%／20% 加權再乘 100。圖表的「月」為約略期間，以交易日為準。</p>
+<p class="note">全母體 PR 及分類 PR 為 1–99 百分位，SPY 不參與排名。分類 PR 母體較小，不能跨分類比較。各國 ETF 含匯率影響，期貨商品含轉倉影響；清單並非所有國家完整覆蓋。最新收盤或完整一年歷史缺失會排除；SPY 缺價則停止計算。</p>
+<p class="note">熱力圖色階以全母體的最大絕對相對報酬對稱設定，篩選時保持固定，避免同一數值變色。分類圖為篩選後 ETF 分數中位數，不代表可投資組合績效。</p>
+<p><a href="rankings.csv" download>下載排名 CSV</a> · <a href="adjusted_close.csv" download>下載調整行情</a> · <a href="run_metadata.json">執行來源紀錄</a></p>
+</details></section>
+<section class="panel"><details><summary>未納入計算（{{EXCLUDED_COUNT}} 檔）</summary><div class="table-wrap">{{EXCLUSIONS}}</div></details></section>
+<footer>資料來源：Yahoo Finance／yfinance 美元調整收盤；離線重跑時依提供的調整行情 CSV。圖表程式與資料均內嵌，可離線開啟；檔數控制只影響排名圖與熱力圖。</footer>
+</main>
+<script id="report-data" type="application/json">{{DATA}}</script>
+<script>
+'use strict';
+const payload=JSON.parse(document.getElementById('report-data').textContent);
+const rows=payload.rows.filter(r=>r.ticker!=='SPY');
+const periods=[63,126,189,252];
+const positiveColor='#285ea8',negativeColor='#c76c23';
+const chartIds=['ranking-chart','category-chart','heatmap-chart','trend-chart'];
+const config={responsive:true,displaylogo:false,scrollZoom:false,modeBarButtonsToRemove:['lasso2d','select2d'],toImageButtonOptions:{format:'png',scale:2}};
+const safe=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const signed=value=>(value>0?'+':'')+value.toFixed(2);
+const median=values=>{const v=[...values].sort((a,b)=>a-b),i=Math.floor(v.length/2);return v.length?(v.length%2?v[i]:(v[i-1]+v[i])/2):null;};
+const bound=Math.max(1,...rows.flatMap(r=>periods.map(p=>Math.abs(r[`relative_${p}d_pct`]))));
+document.getElementById('heatmap-scale').innerHTML=`<span><i class="swatch" style="background:${negativeColor}"></i>${signed(-bound)}%</span><span><i class="swatch" style="background:#f4f6fa;border:1px solid #bac7d5"></i>0%</span><span><i class="swatch" style="background:${positiveColor}"></i>${signed(bound)}%</span>`;
+let selectedRows=rows;
+function layout(height){return {height,margin:{l:140,r:60,t:15,b:55},paper_bgcolor:'white',plot_bgcolor:'white',font:{family:'system-ui, sans-serif',size:13,color:'#172b46'},showlegend:false,xaxis:{zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e5ebf2',automargin:true},yaxis:{automargin:true}};}
+function empty(id,message){Plotly.purge(id);document.getElementById(id).innerHTML='';const p=document.createElement('p');p.className='empty';p.textContent=message;document.getElementById(id).appendChild(p);}
+function clearEmpty(id){document.getElementById(id).querySelectorAll('.empty').forEach(el=>el.remove());}
+function drawBars(id,data,categories,values,custom,height){
+ if(!data.length){empty(id,'沒有符合條件的 ETF');return;}
+ clearEmpty(id);
+ const base=layout(height);base.yaxis.autorange='reversed';base.xaxis.title={text:'加權 RS 分數（0 = SPY）'};
+ base.xaxis.range=[Math.min(0,...values)*1.24,Math.max(0,...values)*1.24];
+ if(values.every(v=>v===0))base.xaxis.range=[-1,1];
+ if(data.length===1)base.yaxis.range=[0.9,-0.9];
+ return Plotly.react(id,[{type:'bar',orientation:'h',y:categories,x:values,customdata:custom,marker:{color:values.map(v=>v>=0?positiveColor:negativeColor)},text:values.map(signed),textposition:'outside',cliponaxis:false,hovertemplate:'%{customdata}<br>RS 分數：%{x:.2f}<extra></extra>'}],base,config);
+}
+function renderTrend(){
+ const ticker=document.getElementById('ticker').value, values=payload.trend.series[ticker];
+ if(!values){empty('trend-chart',selectedRows.length?'沒有可用走勢資料':'沒有符合條件的 ETF');return;}
+ clearEmpty('trend-chart');
+ const row=rows.find(r=>r.ticker===ticker);const dates=payload.trend.dates;
+ const base=layout(370);base.margin.l=65;base.showlegend=true;base.legend={orientation:'h',y:1.15};
+ const tickCount=window.innerWidth<600?3:6;
+ const ticks=Array.from({length:tickCount},(_,i)=>dates[Math.round(i*(dates.length-1)/(tickCount-1))]);
+ base.xaxis={type:'date',tickvals:ticks,tickformat:'%Y-%m-%d',tickangle:0,title:{text:'美股交易日期'},range:[dates[0],dates.at(-1)],gridcolor:'#e5ebf2'};
+ base.yaxis={title:{text:'相對 SPY 指數（起點100）'},gridcolor:'#e5ebf2',zeroline:false,automargin:true};
+ return Plotly.react('trend-chart',[
+ {type:'scatter',mode:'lines',name:safe(ticker+' '+row.name),x:dates,y:values,line:{color:positiveColor,width:2},hovertemplate:'%{x|%Y-%m-%d}<br>相對強度：%{y:.2f}<extra></extra>'},
+ {type:'scatter',mode:'lines',name:'SPY 基準 100',x:[dates[0],dates.at(-1)],y:[100,100],line:{color:'#52657c',width:1.5,dash:'dash'},hoverinfo:'skip'}],base,config);
+}
+async function filter(){
+ const c=document.getElementById('category').value,q=document.getElementById('search').value.toLowerCase().trim(),strong=document.getElementById('strong').checked;
+ selectedRows=rows.filter(r=>(!c||r.category===c)&&[r.ticker,r.name,r.exposure,r.category].join(' ').toLowerCase().includes(q)&&(!strong||r.rs_score>0));
+ const tickers=new Set(selectedRows.map(r=>r.ticker));
+ for(const row of document.querySelectorAll('#rankings tbody tr'))row.hidden=row.cells[0].textContent!=='SPY'&&!tickers.has(row.cells[0].textContent);
+ const count=selectedRows.length,pos=selectedRows.filter(r=>r.rs_score>0).length;
+ document.getElementById('count').textContent=count;
+ document.getElementById('positive').textContent=count?`${(100*pos/count).toFixed(1)}%`:'—';
+ document.getElementById('positive-note').textContent=`${pos} / ${count} 檔`;
+ document.getElementById('median').textContent=count?signed(median(selectedRows.map(r=>r.rs_score))):'—';
+ const strongest=[...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)[0];
+ document.getElementById('leader').textContent=strongest?strongest.ticker:'—';
+ document.getElementById('leader-note').textContent=strongest?`${strongest.name} · RS ${signed(strongest.rs_score)}`:'沒有符合條件的 ETF';
+ const ascending=document.getElementById('order').value==='bottom',limit=document.getElementById('limit').value;
+ const sorted=[...selectedRows].sort((a,b)=>(ascending?a.rs_score-b.rs_score:b.rs_score-a.rs_score)||a.ticker.localeCompare(b.ticker));
+ const shown=limit==='all'?sorted:sorted.slice(0,Number(limit));
+ document.getElementById('ranking-caption').textContent=`目前篩選 ${count} 檔，顯示${ascending?'最弱':'最強'} ${shown.length} 檔；長條保留正負與零基準。`;
+ await drawBars('ranking-chart',shown,shown.map(r=>safe(r.ticker+' '+r.name)),shown.map(r=>r.rs_score),shown.map(r=>safe(`${r.ticker} ${r.name} · ${r.category} · 全母體 PR ${r.rs_rank}`)),Math.max(340,shown.length*32+80));
+ const grouped=new Map();for(const r of selectedRows){if(!grouped.has(r.category))grouped.set(r.category,[]);grouped.get(r.category).push(r.rs_score);}
+ const groups=[...grouped].map(([category,values])=>({category,count:values.length,score:median(values)})).sort((a,b)=>b.score-a.score);
+ await drawBars('category-chart',groups,groups.map(g=>safe(`${g.category}（${g.count}檔）`)),groups.map(g=>g.score),groups.map(g=>safe(`${g.category} · ${g.count} 檔 · 中位數`)),Math.max(340,groups.length*37+80));
+ document.getElementById('heatmap-caption').textContent=`顯示同一組 ${shown.length} 檔 ETF；藍色為跑贏、橙色為落後 SPY，單位 %。色階固定於 ±${bound.toFixed(1)}%。游標移入可讀取精確值。`;
+ if(shown.length){clearEmpty('heatmap-chart');const base=layout(Math.max(340,shown.length*30+90));base.margin.l=110;base.margin.r=20;base.margin.b=35;base.yaxis.autorange='reversed';
+ base.xaxis={side:'top',tickangle:0,automargin:true};
+ await Plotly.react('heatmap-chart',[{type:'heatmap',x:['3月<br>63日','6月<br>126日','9月<br>189日','12月<br>252日'],y:shown.map(r=>safe(r.ticker+' '+r.name)),z:shown.map(r=>periods.map(p=>r[`relative_${p}d_pct`])),zmin:-bound,zmax:bound,zmid:0,colorscale:[[0,negativeColor],[0.5,'#f4f6fa'],[1,positiveColor]],showscale:false,hovertemplate:'%{y}<br>%{x}<br>相對 SPY：%{z:.2f}%<extra></extra>',xgap:2,ygap:2}],base,config);
+ }else empty('heatmap-chart','沒有符合條件的 ETF');
+ const select=document.getElementById('ticker'),previous=select.value;select.replaceChildren();
+ for(const r of [...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)){const option=document.createElement('option');option.value=r.ticker;option.textContent=`${r.ticker} · ${r.name}`;select.appendChild(option);}
+ if(tickers.has(previous))select.value=previous;
+ await renderTrend();
+}
+let rendering=false,pending=false;
+async function scheduleFilter(){pending=true;if(rendering)return;rendering=true;try{while(pending){pending=false;await filter();}}finally{rendering=false;}}
+for(const id of ['category','search','strong','order','limit'])document.getElementById(id).addEventListener('input',scheduleFilter);
+document.getElementById('ticker').addEventListener('change',renderTrend);
+scheduleFilter();
+window.addEventListener('resize',scheduleFilter);
+</script>
+</body></html>

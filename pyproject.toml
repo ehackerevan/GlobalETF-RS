@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "global-etf-rs"
+version = "0.1.0"
+description = "以 SPY 為基準的全球跨資產 ETF 相對強度掃描器"
+requires-python = ">=3.10"
+dependencies = ["pandas>=2.2,<3", "numpy>=1.26,<2.4", "yfinance>=0.2.65,<1", "exchange-calendars>=4.5,<5", "plotly>=6,<7"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+
+[project.scripts]
+global-etf-rs = "global_etf_rs.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["global_etf_rs*"]
+
+[tool.setuptools.package-data]
+global_etf_rs = ["universe.csv", "templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
