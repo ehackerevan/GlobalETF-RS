@@ -4,7 +4,7 @@
 
 這是獨立的 Python 專案；RSNotify 只提供 IBD 類型加權期間的參考，未匯入其程式碼，也不依賴其台股、Telegram、GCP 或籌碼功能。
 
-固定以 **SPY** 為 benchmark，透過美股掛牌 ETF 比較各國／區域股市、大宗商品、農產品、債券、投資風格、市值規模及市值與風格組合。預設清單有 90 檔，包含 SPY；可修改 `global_etf_rs/universe.csv`。
+固定以 **SPY** 為 benchmark，透過美股掛牌 ETF 比較各國／區域股市、大宗商品、農產品、債券、投資風格、市值規模及市值與風格組合。預設清單有 114 檔，包含 SPY；可修改 `global_etf_rs/universe.csv`。
 
 ## 安裝與執行
 
@@ -82,6 +82,22 @@ python -m global_etf_rs --prices output/adjusted_close.csv \
 ```
 
 離線重跑的 `--as-of` 應與檔案資料日一致。下載失敗會回傳非零結束碼；不將來源失敗永久標記為下市。自訂清單必須含 SPY，代碼不可重複。
+
+## 優先補齊的 ETF 類型
+
+清單新增 24 檔，含基準共 114 檔：
+
+| 分類 | 新增標的 |
+|---|---|
+| 美國 11 大產業板塊 | XLK、XLF、XLE、XLV、XLI、XLP、XLY、XLU、XLB、XLRE、XLC |
+| 不動產／REITs | VNQ、VNQI |
+| 外匯 | UUP、FXE、FXY |
+| 債券細分類型 | FLOT、BKLN、MBB、CWB、EMLC |
+| 海外投資風格 | IMTM、IQLT、EFAV |
+
+產業 ETF 是企業股票曝險，例如 XLE 不等於原油、XLB 不等於商品期貨。VNQ／VNQI 包含不動產企業與 REITs，與 XLRE 有部分重疊。UUP 為美元指數期貨策略，FXE／FXY 為外幣信託；報酬為美元計價，與 SPY 比較時代表外匯策略相對股票的強弱。
+
+BKLN 是銀行貸款曝險，CWB 含可轉債與可轉換特別股，EMLC 承受當地貨幣匯率影響，結構欄位另行標示。IMTM／IQLT／EFAV 與美股風格分開分類。新增母體後，全母體 PR 會重新計算，不能把變化全部解讀成價格強弱改變。
 
 ## ETF 對應與覆蓋限制
 

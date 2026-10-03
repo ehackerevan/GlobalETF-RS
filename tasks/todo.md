@@ -30,3 +30,12 @@ HTML 驗證：24 項測試通過；Chromium 桌面 1440px／手機 390px 檢查�
 接續部署：已確認 ehackerevan/GlobalETF-RS 為空白公開 repository，透過 GitHub API 推送。第一次 Actions run 37091172258：25 項測試通過，2026-10-02 行情 89 檔排名、0 檔排除；Pages 啟用被 API 與 workflow 回覆 403。等待帳號端設定 Pages Source，再重跑發布。
 
 正式發布成功：2026-10-03 Actions run 37091381156，build／deploy 成功；網站 https://ehackerevan.github.io/GlobalETF-RS/、rankings.csv、run_metadata.json 均 HTTP 200。資料日 2026-10-02，89 檔排名、0 檔排除。公開網址 Chromium 桌面／手機、四圖表、分類／搜尋／正分數／最弱排序／空結果與恢復、RS 線終值均通過；無 JavaScript 錯誤。
+
+## 2026-10-03 補齊優先 ETF 類型
+
+- [x] 新增 11 大產業板塊、REITs、外匯、細分債券、海外風格共 24 檔。
+- [x] 核對美元掛牌資訊及完整一年行情，更新結構與曝險說明。
+- [x] 更新清單說明、執行既有測試與報表互動驗證。
+- [ ] 透過 GitHub API 推送並確認 Actions 與 Pages 成功。
+
+擴充驗證：新增 24 檔 Yahoo 掛牌資料均為 quoteType=ETF、currency=USD，NYSE Arca／Nasdaq／Cboe 掛牌。2026-10-02 完整收盤共 114 檔、113 檔排名、0 檔排除；25 項既有測試通過。五類篩選與圖表數量及手機版驗證通過。
