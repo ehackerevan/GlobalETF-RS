@@ -1,5 +1,7 @@
 # GlobalETF-RS：全球跨資產 ETF 相對強度
 
+[開啟線上報表](https://ehackerevan.github.io/GlobalETF-RS/) · [自動更新紀錄](https://github.com/ehackerevan/GlobalETF-RS/actions)
+
 這是獨立的 Python 專案；RSNotify 只提供 IBD 類型加權期間的參考，未匯入其程式碼，也不依賴其台股、Telegram、GCP 或籌碼功能。
 
 固定以 **SPY** 為 benchmark，透過美股掛牌 ETF 比較各國／區域股市、大宗商品、農產品、債券、投資風格、市值規模及市值與風格組合。預設清單有 90 檔，包含 SPY；可修改 `global_etf_rs/universe.csv`。
