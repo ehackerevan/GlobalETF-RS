@@ -13,7 +13,7 @@ from global_etf_rs.universe import load_universe
 
 def sample():
     cal=xcals.get_calendar('XNYS')
-    dates=cal.sessions_in_range(cal.session_offset('2026-10-02',-299),'2026-10-02')
+    dates=cal.sessions_in_range(cal.session_offset('2026-10-02',-349),'2026-10-02')
     rng=np.random.default_rng(42)
     moves=rng.normal(.0005,.01,len(dates)-1)
     prices=pd.DataFrame({'SPY':np.r_[100,100*np.cumprod(1+moves)],
@@ -26,7 +26,7 @@ def sample():
 
 def test_bootstrap_is_labeled_and_exact_anchor_changes_match():
     prices,u,r=sample();enriched,h,m=update_history(r,u,prices)
-    assert m['snapshot_dates']==22 and m['observed_dates']==1 and m['reconstructed_dates']==21
+    assert m['snapshot_dates']==65 and m['observed_dates']==1 and m['reconstructed_dates']==64
     cal=xcals.get_calendar('XNYS');date=cal.session_offset(r.data_date.iloc[0],-5)
     prior,_=calculate(prices,u,date)
     expected=r.set_index('ticker').loc['DBA','rs_score']-prior.set_index('ticker').loc['DBA','rs_score']
@@ -98,8 +98,8 @@ def test_restored_archive_prevents_reconstruction_and_accumulates_next_day(tmp_p
     prices,u,r=sample();prior,_=calculate(prices,u,prices.index[-2]);_,h,m=update_history(prior,u,prices)
     path=tmp_path/'history.csv';h.to_csv(path,index=False)
     _,new,summary=update_history(r,u,prices,path)
-    assert summary['snapshot_dates']==23 and summary['observed_dates']==2
-    assert summary['reconstructed_dates']==21
+    assert summary['snapshot_dates']==66 and summary['observed_dates']==2
+    assert summary['reconstructed_dates']==64
     old=new[new.data_date.lt('2026-10-02')].reset_index(drop=True)
     pd.testing.assert_frame_equal(h.reset_index(drop=True),old,check_dtype=False)
 
@@ -147,3 +147,16 @@ def test_missing_published_archive_is_not_silently_rebuilt(monkeypatch,tmp_path)
     with pytest.raises(ValueError,match='已發布歷史缺失'):
         restore_history('https://example.test/rs_history.csv',tmp_path/'history.csv')
     assert not (tmp_path/'history.csv').exists()
+
+
+def test_short_archive_extends_only_before_earliest_and_preserves_gaps(tmp_path):
+    prices,u,r=sample();_,h,_=update_history(r,u,prices)
+    dates=sorted(h.data_date.unique());short=h[h.data_date.ge(dates[-22])].copy()
+    missing=dates[-10];short=short[short.data_date.ne(missing)]
+    path=tmp_path/'history.csv';short.to_csv(path,index=False)
+    _,new,meta=update_history(r,u,prices,path)
+    assert meta['snapshot_dates']==64
+    assert missing not in set(new.data_date)
+    actual=new[new.snapshot_kind.eq('observed')]
+    assert actual.recorded_at_utc.tolist()==short[short.snapshot_kind.eq('observed')].recorded_at_utc.tolist()
+    assert new.data_date.min()==dates[0]

@@ -65,9 +65,13 @@ def update_history(result, universe, prices, history_path=None):
     if history.data_date.gt(end.date().isoformat()).any():
         raise ValueError('執行日期早於已保存快照，請使用獨立輸出資料夾以保留歷史')
     calendar = xcals.get_calendar('XNYS')
-    targets = calendar.sessions_in_range(calendar.session_offset(end, -21), end).tz_localize(None)
-    if history.empty:
+    targets = calendar.sessions_in_range(end - pd.DateOffset(months=3), end).tz_localize(None)
+    # 只向既有歷史之前延伸，不回填中間缺日或覆寫實際快照。
+    earliest = history.data_date.min() if not history.empty else end.date().isoformat()
+    if len(targets):
         for date in targets[:-1]:
+            if date.date().isoformat() >= earliest:
+                continue
             try:
                 prior, _ = calculate(prices, universe, date)
                 if coverage_summary(universe, prior)['publishable']:
