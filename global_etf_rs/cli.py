@@ -7,6 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 from .calculator import calculate
+from .history import update_history
+from .correlation import calculate_correlation
 from .assessment import enrich_assessment, coverage_summary
 from .prices import download_prices, latest_closed_session
 from .report import write_reports
@@ -22,6 +24,7 @@ def main(argv=None):
     parser.add_argument("--volumes", help="離線成交股數 CSV，配合 --raw-prices")
     parser.add_argument("--raw-prices", help="離線未調整收盤 CSV，計算成交金額")
     parser.add_argument("--allow-partial", action="store_true", help="僅供人工檢視，允許不足發布門檻的報表")
+    parser.add_argument("--history", help="前次 RS 快照 CSV；預設讀取輸出資料夾 rs_history.csv")
     args = parser.parse_args(argv)
     try:
         universe = load_universe(args.universe)
@@ -47,7 +50,9 @@ def main(argv=None):
         if not quality['publishable'] and not args.allow_partial:
             raise ValueError(f"資料完整率不足發布門檻：整體 {quality['coverage_pct']:.1f}%，需 >=90% 且每類 >=70%；拒絕覆寫報表")
         result = enrich_assessment(result, prices, volumes, raw_prices)
-        path = write_reports(result, excluded, args.output, prices=prices, quality=quality)
+        result, history, history_meta = update_history(result, universe, prices, args.history or Path(args.output) / 'rs_history.csv')
+        result, correlation, correlation_samples, correlation_payload = calculate_correlation(prices, result)
+        path = write_reports(result, excluded, args.output, prices=prices, quality=quality, history=history, history_meta=history_meta, correlation=correlation_payload)
         Path(args.output).mkdir(parents=True, exist_ok=True)
         prices.reindex(columns=universe.ticker).loc[:session].to_csv(Path(args.output) / "adjusted_close.csv", index_label="Date")
         for filename, frame in [('volume.csv', volumes), ('unadjusted_close.csv', raw_prices)]:
@@ -55,6 +60,9 @@ def main(argv=None):
                 frame.reindex(columns=universe.ticker).loc[:session].to_csv(Path(args.output) / filename, index_label="Date")
             else:
                 (Path(args.output) / filename).unlink(missing_ok=True)
+        history.to_csv(Path(args.output) / 'rs_history.csv', index=False, encoding='utf-8-sig')
+        correlation.to_csv(Path(args.output) / 'correlation_63d.csv', index_label='ticker')
+        correlation_samples.to_csv(Path(args.output) / 'correlation_samples.csv', index_label='ticker')
         universe.to_csv(Path(args.output) / "universe.csv", index=False, encoding="utf-8-sig")
         metadata = {
             "benchmark": "SPY", "data_date": session.date().isoformat(),
@@ -65,6 +73,8 @@ def main(argv=None):
             "universe_count": len(universe), "ranked_count": len(result) - 1,
             "excluded_count": len(excluded),
             "data_quality": quality,
+            "history": history_meta,
+            "correlation": {"window_sessions": 63, "min_samples": 60},
             "assessment": {"volatility_window": 252, "moving_averages": [50, 200],
                            "liquidity_window": 20, "minimum_dollar_volume": 1000000,
                            "liquidity_basis": "未調整收盤價乘成交股數，非實際成交金額或價差"},

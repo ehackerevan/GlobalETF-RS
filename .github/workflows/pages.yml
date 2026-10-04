@@ -37,10 +37,12 @@ jobs:
           python -m pip install -e '.[dev]' --no-deps
       - name: 驗證計算與報表
         run: python -m pytest -q
+      - name: 恢復前次已發布快照
+        run: python -m global_etf_rs.history --url https://ehackerevan.github.io/GlobalETF-RS/rs_history.csv --destination history/rs_history.csv
       - name: 掃描最新完整收盤行情
         run: |
           for attempt in 1 2 3; do
-            if python -m global_etf_rs --output public; then
+            if python -m global_etf_rs --output public --history history/rs_history.csv; then
               cp public/report.html public/index.html
               touch public/.nojekyll
               exit 0

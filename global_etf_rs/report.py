@@ -14,6 +14,13 @@ LABELS = {
     "rs_score": "加權 RS 分數", "rs_rank": "全母體 PR", "category_rank": "分類 PR",
     "outperforms_spy": "加權跑贏 SPY", "rs_line_1y": "一年 RS 線（起點100）",
     "reason": "排除原因",
+    "rs_change_5d": "RS分數5日變化", "rs_change_21d": "RS分數21日變化",
+    "pr_change_5d": "PR5日變化", "pr_change_21d": "PR21日變化",
+    "history_basis_5d": "5日比較來源", "history_basis_21d": "21日比較來源",
+    "pr_std_21d": "21日PR標準差", "history_days_21d": "21日可比快照數",
+    "stability_basis": "穩定性來源", "correlation_spy_63d": "63日對SPY相關",
+    "most_correlated_ticker": "最高相關同儕", "highest_peer_correlation_63d": "63日同儕相關",
+    "peer_correlation_samples": "同儕共同樣本數",
     "valid_price_rows": "253日內有效價格筆數", "trade_state": "強弱狀態", "absolute_momentum_pct": "加權絕對動能 %",
     "volatility_1y_pct": "一年年化波動 %", "downside_risk_1y_pct": "一年下行風險 %",
     "max_drawdown_1y_pct": "一年最大回撤 %", "current_drawdown_1y_pct": "距一年高點 %",
@@ -46,7 +53,7 @@ def _trend_payload(prices, result):
     return {"dates": frame.index.strftime("%Y-%m-%d").tolist(), "series": series}
 
 
-def write_reports(result, excluded, output_dir, prices=None, quality=None):
+def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, correlation=None):
     folder = Path(output_dir)
     folder.mkdir(parents=True, exist_ok=True)
     result.to_csv(folder / "rankings.csv", index=False, encoding="utf-8-sig")
@@ -67,13 +74,20 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None):
     for column in ['above_ma50', 'above_ma200']:
         assessment[column] = assessment[column].map({True: '是', False: '否'})
     assessment_table = assessment.rename(columns=LABELS).to_html(index=False, border=0, table_id='assessment', na_rep='未知', float_format=lambda value: f'{value:,.2f}')
+    momentum_columns = ['ticker','name','rs_change_5d','rs_change_21d','pr_change_5d','pr_change_21d',
+        'history_basis_5d','history_basis_21d','pr_std_21d','history_days_21d','stability_basis',
+        'correlation_spy_63d','most_correlated_ticker','highest_peer_correlation_63d','peer_correlation_samples']
+    momentum_table = result.reindex(columns=momentum_columns).rename(columns=LABELS).to_html(index=False,border=0,table_id='momentum',na_rep='資料不足',float_format=lambda value:f'{value:.2f}')
+    history_records = [] if history is None else json.loads(history.to_json(orient='records'))
+    history_meta = history_meta or {'snapshot_dates':0,'observed_dates':0,'reconstructed_dates':0}
+    history_label = f"保存 {history_meta['snapshot_dates']} 個交易日：實際快照 {history_meta['observed_dates']} 日、重建 {history_meta['reconstructed_dates']} 日"
     states = ''.join(f'<option>{escape(str(state))}</option>' for state in sorted(result.get('trade_state', pd.Series(dtype=str)).dropna().unique()) if state != '基準')
     quality = quality or {'status': '未提供完整母體', 'coverage_pct': 100 * (len(result)-1) / max(1,len(result)+len(excluded)-1), 'publishable': False, 'categories': []}
     quality_label = f"{quality['status']} · 可計算 {quality['coverage_pct']:.1f}% · " + ('達發布門檻' if quality['publishable'] else '未達發布門檻／人工檢視')
     quality_table = pd.DataFrame(quality['categories']).rename(columns={'category':'分類','expected':'清單檔數','eligible':'合格檔數','coverage_pct':'完整率 %'}).to_html(index=False,border=0,float_format=lambda value:f'{value:.1f}')
     options = ''.join(f'<option>{escape(category)}</option>' for category in sorted(result["category"].unique()) if category != "基準")
     exclusions = excluded.rename(columns=LABELS).to_html(index=False, border=0) if not excluded.empty else "<p>無排除標的。</p>"
-    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality}
+    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality, "history": history_records, "history_meta": history_meta, "correlation": correlation}
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     values = {
         "PLOTLY": get_plotlyjs(), "DATA": data, "TABLE": table,
@@ -82,6 +96,7 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None):
         "UNIVERSE_COUNT": str(len(result) - 1), "ASSESSMENT_TABLE": assessment_table,
         "STATES": states, "QUALITY_LABEL": escape(quality_label), "QUALITY_TABLE": quality_table,
         "QUALITY_CLASS": 'note' if quality['status'] == '完整' else 'quality-warning',
+        "MOMENTUM_TABLE": momentum_table, "HISTORY_LABEL": escape(history_label),
         "CREATED_AT": pd.Timestamp.now(tz='Asia/Taipei').strftime('%Y-%m-%d %H:%M 台灣時間'),
     }
     template = Path(__file__).with_name("templates").joinpath("report.html").read_text(encoding="utf-8")
