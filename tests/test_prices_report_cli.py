@@ -39,7 +39,7 @@ def test_offline_cli_and_html(tmp_path):
     universe.loc[universe.ticker.eq("DBA"), "name"] = '<script>alert(1)</script>'
     universe.to_csv(tmp_path / "universe.csv", index=False)
     prices.to_csv(tmp_path / "prices.csv", index_label="Date")
-    code = main(["--universe", str(tmp_path / "universe.csv"), "--prices", str(tmp_path / "prices.csv"),
+    code = main(["--allow-partial", "--universe", str(tmp_path / "universe.csv"), "--prices", str(tmp_path / "prices.csv"),
                  "--as-of", "2026-09-30", "--output", str(tmp_path / "report")])
     assert code == 0
     page = (tmp_path / "report/report.html").read_text()
@@ -126,7 +126,21 @@ def test_public_metadata_does_not_expose_local_input_path(tmp_path):
     input_file.parent.mkdir()
     pd.DataFrame({'SPY': 100., 'DBA': np.linspace(100., 120., 253)}, index=dates).to_csv(input_file)
     folder = tmp_path / 'public'
-    assert main(['--prices', str(input_file), '--as-of', '2026-09-30', '--output', str(folder)]) == 0
+    assert main(['--allow-partial', '--prices', str(input_file), '--as-of', '2026-09-30', '--output', str(folder)]) == 0
     text = (folder / 'run_metadata.json').read_text()
     assert 'private-user-folder' not in text and 'personal-file.csv' not in text
     assert json.loads(text)['source'] == '離線美元調整收盤 CSV'
+
+
+def test_market_data_download_separates_adjusted_raw_and_volume(monkeypatch):
+    from global_etf_rs import prices as module
+    dates=pd.to_datetime(['2026-09-29','2026-09-30'])
+    def download(tickers,**kwargs):
+        assert kwargs['auto_adjust'] is False
+        return pd.DataFrame([[90.,100.,123.],[91.,101.,456.]],index=dates,
+            columns=pd.MultiIndex.from_tuples([('Adj Close','SPY'),('Close','SPY'),('Volume','SPY')]))
+    monkeypatch.setattr(module.yf,'download',download)
+    adjusted,volumes,raw=module.download_prices(['SPY'],pd.Timestamp('2026-09-30'),with_market_data=True)
+    assert adjusted.loc['2026-09-30','SPY']==91
+    assert raw.loc['2026-09-30','SPY']==101
+    assert volumes.loc['2026-09-30','SPY']==456

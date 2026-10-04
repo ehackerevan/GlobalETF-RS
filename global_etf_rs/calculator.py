@@ -37,7 +37,7 @@ def calculate(prices, universe, expected_session):
     for item in universe.to_dict("records"):
         ticker = item["ticker"]
         if ticker not in prices:
-            excluded.append({**item, "reason": "下載未提供行情"})
+            excluded.append({**item, "reason": "下載未提供行情", "valid_price_rows": 0, "data_completeness_pct": 0.0})
             continue
         close = pd.to_numeric(prices[ticker], errors="coerce")
         reason = None
@@ -48,7 +48,7 @@ def calculate(prices, universe, expected_session):
         elif not np.isfinite(close).all() or (close <= 0).any():
             reason = "價格包含非正數或無限值"
         if reason:
-            excluded.append({**item, "reason": reason})
+            excluded.append({**item, "reason": reason, "valid_price_rows": int((np.isfinite(close) & close.gt(0)).sum()), "data_completeness_pct": float((np.isfinite(close) & close.gt(0)).mean() * 100)})
             continue
         row = {**item, "data_date": expected.date().isoformat(), "adjusted_close": close.iloc[-1]}
         relative_returns = []
@@ -76,5 +76,5 @@ def calculate(prices, universe, expected_session):
     for column in ["rs_rank", "category_rank"]:
         result[column] = result[column].astype("Int64")
     result = result.sort_values(["rs_score", "ticker"], ascending=[False, True]).reset_index(drop=True)
-    exclusions = pd.DataFrame(excluded, columns=list(universe.columns) + ["reason"])
+    exclusions = pd.DataFrame(excluded, columns=list(universe.columns) + ["reason", "valid_price_rows", "data_completeness_pct"])
     return result, exclusions

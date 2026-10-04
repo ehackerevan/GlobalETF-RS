@@ -7,7 +7,7 @@
 <style>
 :root{--ink:#172b46;--muted:#52657c;--blue:#285ea8;--orange:#c76c23;--line:#dfe7f0}
 *{box-sizing:border-box}body{font:16px system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:#f3f6fa;color:var(--ink)}
-main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)}footer{color:var(--muted);font-size:13px;margin-top:24px}
+main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)} .quality-warning{padding:12px;background:#fff1d9;border-left:4px solid #c76c23}.risk-chart{min-height:420px}footer{color:var(--muted);font-size:13px;margin-top:24px}
 @media(max-width:850px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}main{padding:20px 12px}.panel{padding:14px}.controls label{max-width:100%}.chart{min-height:300px}}
 @media print{body{background:white}.controls,.modebar{display:none}.table-wrap,.scroll-chart{max-height:none}.panel{break-inside:avoid}}
 </style>
@@ -17,11 +17,14 @@ main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px
 <header><div class="eyebrow">GLOBAL ETF · RELATIVE STRENGTH</div>
 <h1>全球跨資產 ETF 相對強度</h1>
 <p class="meta">基準 SPY · 完整收盤日 {{DATE}} · 合格 ETF {{UNIVERSE_COUNT}} 檔 · 排除 {{EXCLUDED_COUNT}} 檔</p>
+<p class="{{QUALITY_CLASS}}">資料狀態：{{QUALITY_LABEL}} · 報表產生：{{CREATED_AT}}</p>
 <p class="note">以美元配息／拆分調整行情比較。RS 分數大於 0 代表加權期間跑贏 SPY；PR 表示 ETF 母體內的排名，兩者分開閱讀。</p></header>
 <div class="controls panel" aria-label="報表篩選">
 <label>分類 <select id="category"><option value="">全部分類</option>{{OPTIONS}}</select></label>
 <label>搜尋 <input type="search" id="search" placeholder="代碼、名稱或曝險"></label>
 <label><input type="checkbox" id="strong"> 只看加權跑贏 SPY</label>
+<label>強弱狀態 <select id="state"><option value="">全部狀態</option>{{STATES}}</select></label>
+<label><input type="checkbox" id="liquid"> 只看成交額達門檻</label>
 <label>圖表排序 <select id="order"><option value="top">最強優先</option><option value="bottom">最弱優先</option></select></label>
 <label>圖表檔數 <select id="limit"><option value="15">15 檔</option><option value="30">30 檔</option><option value="all">全部</option></select></label>
 </div>
@@ -38,6 +41,8 @@ main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px
 </div>
 <section class="panel wide"><h2>各期間相對 SPY 報酬</h2><p class="caption" id="heatmap-caption"></p><div class="legend" id="heatmap-scale"></div><div class="scroll-chart"><div id="heatmap-chart" class="chart" role="img" aria-label="ETF 各期間相對 SPY 報酬熱力圖"></div></div></section>
 <section class="panel"><h2>一年相對強度走勢</h2><label>選擇標的 <select id="ticker"></select></label><p class="caption">ETF 調整價格 ÷ SPY 調整價格，起點正規化為 100。高於 100 表示從起點至當日跑贏 SPY；不是 ETF 價格或加權 RS 分數。</p><div id="trend-chart" class="chart" role="img" aria-label="一年相對 SPY 強度走勢"></div></section>
+<section class="panel"><h2>絕對動能與波動</h2><p class="caption">每個點為一檔符合篩選的 ETF。上方為加權絕對動能正值，右側為較高一年年化波動；不代表未來報酬或買賣建議。</p><div id="risk-chart" class="chart risk-chart" role="img" aria-label="絕對動能與年化波動散佈圖"></div></section>
+<section class="panel"><h2>交易觀察指標</h2><p class="caption">均線使用調整價格；成交額使用未調整收盤價 × 成交股數的 20 日平均。達門檻僅指近似日均至少 100 萬美元，不保證價差、深度或成交。未知表示資料不足。</p><div class="table-wrap">{{ASSESSMENT_TABLE}}</div></section>
 <section class="panel"><h2>完整排名資料</h2><p class="caption">表格顯示全部符合篩選的標的，圖表檔數不限制表格。PR 依原始合格母體計算，篩選後不重算；SPY 參考列保持顯示。</p><div class="table-wrap">{{TABLE}}</div></section>
 <section class="panel"><details><summary>計算方法與資料限制</summary>
 <p class="note">相對 N 日報酬＝(ETF 今日／ETF N 日前) ÷ (SPY 今日／SPY N 日前) − 1。加權 RS 分數＝相對 63／126／189／252 交易日報酬分別以 40%／20%／20%／20% 加權再乘 100。圖表的「月」為約略期間，以交易日為準。</p>
@@ -46,6 +51,11 @@ main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px
 <p><a href="rankings.csv" download>下載排名 CSV</a> · <a href="adjusted_close.csv" download>下載調整行情</a> · <a href="run_metadata.json">執行來源紀錄</a></p>
 </details></section>
 <section class="panel"><details><summary>未納入計算（{{EXCLUDED_COUNT}} 檔）</summary><div class="table-wrap">{{EXCLUSIONS}}</div></details></section>
+<section class="panel"><details><summary>資料完整率與指標定義</summary><div class="table-wrap">{{QUALITY_TABLE}}</div>
+<p class="note">整體合格比例需至少 90%，各分類至少 70%，才可自動發布；未達標保留前次網站。若人工允許部分資料，報表明確標示。資料日期可能為休市前一交易日，請核對頁首；排程失敗也會留下舊報表。</p>
+<p class="note">四種狀態使用加權 RS 與加權絕對報酬是否大於零分類，零歸入非強／非上漲。絕對動能權重為 63／126／189／252 日的 40%／20%／20%／20%，不等同每段期間皆上漲，也不代表站上均線。波動為 252 個日報酬樣本標準差 × √252；下行風險為所有日報酬負值（正值設零）的均方根 × √252。回撤以最近 253 個收盤及滾動歷史高點計算，並非完整持有期或盤中最大回撤。</p>
+<p class="note">使用下一交易日的實際成交價格才能評估交易成本。本報表尚無進出場規則、部位配置、價差資料或策略回測。缺乏成交量或未調整價格時不推算流動性。</p>
+</details></section>
 <footer>資料來源：Yahoo Finance／yfinance 美元調整收盤；離線重跑時依提供的調整行情 CSV。圖表程式與資料均內嵌，可離線開啟；檔數控制只影響排名圖與熱力圖。</footer>
 </main>
 <script id="report-data" type="application/json">{{DATA}}</script>
@@ -55,7 +65,7 @@ const payload=JSON.parse(document.getElementById('report-data').textContent);
 const rows=payload.rows.filter(r=>r.ticker!=='SPY');
 const periods=[63,126,189,252];
 const positiveColor='#285ea8',negativeColor='#c76c23';
-const chartIds=['ranking-chart','category-chart','heatmap-chart','trend-chart'];
+const chartIds=['ranking-chart','category-chart','heatmap-chart','trend-chart','risk-chart'];
 const config={responsive:true,displaylogo:false,scrollZoom:false,modeBarButtonsToRemove:['lasso2d','select2d'],toImageButtonOptions:{format:'png',scale:2}};
 const safe=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const signed=value=>(value>0?'+':'')+value.toFixed(2);
@@ -91,9 +101,10 @@ function renderTrend(){
 }
 async function filter(){
  const c=document.getElementById('category').value,q=document.getElementById('search').value.toLowerCase().trim(),strong=document.getElementById('strong').checked;
- selectedRows=rows.filter(r=>(!c||r.category===c)&&[r.ticker,r.name,r.exposure,r.category].join(' ').toLowerCase().includes(q)&&(!strong||r.rs_score>0));
+ const state=document.getElementById('state').value,liquid=document.getElementById('liquid').checked;
+ selectedRows=rows.filter(r=>(!state||r.trade_state===state)&&(!liquid||r.liquidity_status==='成交額達門檻')&&(!c||r.category===c)&&[r.ticker,r.name,r.exposure,r.category].join(' ').toLowerCase().includes(q)&&(!strong||r.rs_score>0));
  const tickers=new Set(selectedRows.map(r=>r.ticker));
- for(const row of document.querySelectorAll('#rankings tbody tr'))row.hidden=row.cells[0].textContent!=='SPY'&&!tickers.has(row.cells[0].textContent);
+ for(const row of document.querySelectorAll('#rankings tbody tr, #assessment tbody tr'))row.hidden=row.cells[0].textContent!=='SPY'&&!tickers.has(row.cells[0].textContent);
  const count=selectedRows.length,pos=selectedRows.filter(r=>r.rs_score>0).length;
  document.getElementById('count').textContent=count;
  document.getElementById('positive').textContent=count?`${(100*pos/count).toFixed(1)}%`:'—';
@@ -119,10 +130,20 @@ async function filter(){
  for(const r of [...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)){const option=document.createElement('option');option.value=r.ticker;option.textContent=`${r.ticker} · ${r.name}`;select.appendChild(option);}
  if(tickers.has(previous))select.value=previous;
  await renderTrend();
+ await renderRisk();
+}
+function renderRisk(){
+ const data=selectedRows.filter(r=>Number.isFinite(r.volatility_1y_pct)&&Number.isFinite(r.absolute_momentum_pct));
+ if(!data.length){empty('risk-chart','沒有可用的風險觀察資料');return;}
+ clearEmpty('risk-chart');const base=layout(430);base.margin={l:70,r:25,t:60,b:65};base.showlegend=true;base.legend={orientation:'h',y:1.15};
+ base.xaxis={title:{text:'一年年化波動 %'},rangemode:'tozero',gridcolor:'#e5ebf2'};
+ base.yaxis={title:{text:'加權絕對動能 %'},zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e5ebf2'};
+ const states=[...new Set(rows.map(r=>r.trade_state))].filter(Boolean).sort();const colors={'相對強・絕對上漲':'#285ea8','相對強・絕對非上漲':'#c76c23','相對非強・絕對上漲':'#758537','相對非強・絕對非上漲':'#707c8d'};
+ return Plotly.react('risk-chart',states.map((state,index)=>{const group=data.filter(r=>r.trade_state===state);return {type:'scatter',mode:'markers',name:safe(state),x:group.map(r=>r.volatility_1y_pct),y:group.map(r=>r.absolute_momentum_pct),marker:{size:9,color:colors[state]||'#707c8d'},customdata:group.map(r=>[safe(r.ticker+' '+r.name),r.max_drawdown_1y_pct,safe(r.liquidity_status)]),hovertemplate:'%{customdata[0]}<br>年化波動：%{x:.2f}%<br>加權絕對動能：%{y:.2f}%<br>一年最大回撤：%{customdata[1]:.2f}%<br>流動性：%{customdata[2]}<extra></extra>'};}),base,config);
 }
 let rendering=false,pending=false;
 async function scheduleFilter(){pending=true;if(rendering)return;rendering=true;try{while(pending){pending=false;await filter();}}finally{rendering=false;}}
-for(const id of ['category','search','strong','order','limit'])document.getElementById(id).addEventListener('input',scheduleFilter);
+for(const id of ['category','search','strong','state','liquid','order','limit'])document.getElementById(id).addEventListener('input',scheduleFilter);
 document.getElementById('ticker').addEventListener('change',renderTrend);
 scheduleFilter();
 window.addEventListener('resize',scheduleFilter);

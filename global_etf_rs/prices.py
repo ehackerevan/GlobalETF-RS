@@ -18,52 +18,63 @@ def latest_closed_session(now=None):
     return pd.Timestamp(closed[-1]).tz_localize(None).normalize()
 
 
-def extract_close(frame):
+def extract_close(frame, field="Close"):
     if frame is None or frame.empty:
         raise ValueError("Yahoo 未提供行情")
     if not isinstance(frame.columns, pd.MultiIndex):
         raise ValueError("行情欄位未包含 ETF 代碼")
     for level in range(frame.columns.nlevels):
-        if "Close" in frame.columns.get_level_values(level):
-            result = frame.xs("Close", axis=1, level=level).copy()
+        if field in frame.columns.get_level_values(level):
+            result = frame.xs(field, axis=1, level=level).copy()
             result.index = pd.to_datetime(result.index).tz_localize(None).normalize()
             return result.sort_index()
     raise ValueError("行情缺少調整後 Close 欄位")
 
 
-def download_prices(tickers, session):
+def download_prices(tickers, session, with_market_data=False):
     session = pd.Timestamp(session)
-    # 每次重抓完整調整歷史，避免配息後把新舊調整基準拼接。
-    frames = []
-    for offset in range(0, len(tickers), 25):
-        batch = tickers[offset:offset + 25]
-        raw = yf.download(
+    fields = ['Adj Close', 'Volume', 'Close'] if with_market_data else ['Close']
+    collections = {field: [] for field in fields}
+
+    def download(batch):
+        return yf.download(
             batch, start=(session - timedelta(days=730)).date().isoformat(),
             end=(session + timedelta(days=1)).date().isoformat(),
-            auto_adjust=True, interval="1d", group_by="column", threads=False,
-            progress=False, timeout=20,
-        )
+            auto_adjust=not with_market_data, interval="1d", group_by="column",
+            threads=False, progress=False, timeout=20)
+
+    for offset in range(0, len(tickers), 25):
+        raw = download(tickers[offset:offset + 25])
         if raw is not None and not raw.empty:
-            frames.append(extract_close(raw))
-    if not frames:
+            for field in fields:
+                try:
+                    collections[field].append(extract_close(raw, field))
+                except ValueError:
+                    if field == fields[0]:
+                        raise
+    if not collections[fields[0]]:
         raise ValueError("所有行情批次下載失敗")
-    result = pd.concat(frames, axis=1)
-    # 單次來源失敗不代表 ETF 下市，不永久剔除標的。
+    frames = {field: pd.concat(parts, axis=1) if parts else pd.DataFrame()
+              for field, parts in collections.items()}
     for ticker in tickers:
-        if ticker not in result or result[ticker].isna().any():
-            raw = yf.download(
-                [ticker], start=(session - timedelta(days=730)).date().isoformat(),
-                end=(session + timedelta(days=1)).date().isoformat(), auto_adjust=True,
-                interval="1d", group_by="column", threads=False, progress=False, timeout=20,
-            )
-            if raw is not None and not raw.empty:
-                recovered = extract_close(raw)
+        prices = frames[fields[0]]
+        if ticker not in prices or prices[ticker].isna().any():
+            raw = download([ticker])
+            if raw is None or raw.empty:
+                continue
+            for field in fields:
+                try:
+                    recovered = extract_close(raw, field)
+                except ValueError:
+                    continue
                 if ticker in recovered:
-                    result = result.reindex(result.index.union(recovered.index)).sort_index()
-                    if ticker in result:
-                        result[ticker] = recovered[ticker].reindex(result.index).combine_first(result[ticker])
-                    else:
-                        result[ticker] = recovered[ticker].reindex(result.index)
+                    frame = frames[field].reindex(frames[field].index.union(recovered.index)).sort_index()
+                    values = recovered[ticker].reindex(frame.index)
+                    frame[ticker] = values.combine_first(frame[ticker]) if ticker in frame else values
+                    frames[field] = frame
     calendar = xcals.get_calendar("XNYS")
     sessions = calendar.sessions_in_range(session - timedelta(days=730), session).tz_localize(None)
-    return result.reindex(sessions)
+    frames = {field: frame.reindex(sessions) for field, frame in frames.items()}
+    if with_market_data:
+        return frames['Adj Close'], frames['Volume'], frames['Close']
+    return frames['Close']
