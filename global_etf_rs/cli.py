@@ -33,6 +33,7 @@ def main(argv=None):
         if session > latest:
             raise ValueError("指定日期尚未完成收盤，拒絕使用盤中行情")
         volumes = raw_prices = None
+        recoveries = []
         if bool(args.volumes) != bool(args.raw_prices) or ((args.volumes or args.raw_prices) and not args.prices):
             raise ValueError("離線成交量及未調整價格需同時提供，且須指定 --prices")
         if args.prices:
@@ -42,11 +43,14 @@ def main(argv=None):
                 raw_prices = pd.read_csv(args.raw_prices, index_col=0, parse_dates=True)
         else:
             print(f"下載 {len(universe)} 檔 ETF 的美元調整行情，資料日 {session.date()}…", flush=True)
-            prices, volumes, raw_prices = download_prices(universe["ticker"].tolist(), session, with_market_data=True)
+            prices, volumes, raw_prices = download_prices(universe["ticker"].tolist(), session, with_market_data=True, recovery_log=recoveries)
         result, excluded = calculate(prices, universe, session)
         if len(result) == 1:
             raise ValueError("除 SPY 外沒有合格 ETF，拒絕產出空排名")
         quality = coverage_summary(universe, result)
+        quality['price_recovery_count'] = len(recoveries)
+        if not excluded.empty:
+            print('排除標的：\n' + excluded[['ticker', 'reason', 'valid_price_rows']].to_string(index=False), file=sys.stderr)
         if not quality['publishable'] and not args.allow_partial:
             raise ValueError(f"資料完整率不足發布門檻：整體 {quality['coverage_pct']:.1f}%，需 >=90% 且每類 >=70%；拒絕覆寫報表")
         result = enrich_assessment(result, prices, volumes, raw_prices)
@@ -63,11 +67,14 @@ def main(argv=None):
         history.to_csv(Path(args.output) / 'rs_history.csv', index=False, encoding='utf-8-sig')
         correlation.to_csv(Path(args.output) / 'correlation_63d.csv', index_label='ticker')
         correlation_samples.to_csv(Path(args.output) / 'correlation_samples.csv', index_label='ticker')
+        recovery_columns = ['ticker', 'data_date', 'source', 'quote_time_utc', 'close', 'adjusted_close', 'adjustment_basis']
+        pd.DataFrame(recoveries, columns=recovery_columns).to_csv(Path(args.output) / 'price_recoveries.csv', index=False, encoding='utf-8-sig')
         universe.to_csv(Path(args.output) / "universe.csv", index=False, encoding="utf-8-sig")
         metadata = {
             "benchmark": "SPY", "data_date": session.date().isoformat(),
             "created_at_utc": pd.Timestamp.now(tz="UTC").isoformat(),
             "source": "離線美元調整收盤 CSV" if args.prices else "Yahoo Finance / yfinance auto_adjust=False / Adj Close, Close, Volume",
+            "price_recoveries": recoveries,
             "price_basis": "美元配息與拆分調整收盤（離線輸入由使用者確保）",
             "weights": {"63": 0.4, "126": 0.2, "189": 0.2, "252": 0.2},
             "universe_count": len(universe), "ranked_count": len(result) - 1,

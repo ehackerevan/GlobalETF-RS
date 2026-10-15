@@ -160,3 +160,11 @@ python -m pytest -q
 repository 設定的 **Settings → Pages → Build and deployment → Source** 使用 **GitHub Actions**。公開網站與輸出行情皆可供任何人查看；來源紀錄不包含離線輸入的本機路徑。部署只發布 `public/` 成品，不發布開發環境、快取或 `.env`。
 
 Actions 使用固定 commit 的官方 action；建置取得 repository 讀取及 Pages 啟用權限，部署 job 取得 Pages 發布及 OIDC 權限。不要把私人持倉或個資放入自訂清單或報表。
+
+## Yahoo 最新日線缺少收盤價的處理
+
+Yahoo 偶爾提供最新交易日的開高低與成交量，卻缺少 Close／Adj Close。重抓日線後仍缺失時，只對同時缺少兩種收盤價的最新一日補查 Yahoo `regularMarketPrice`。必須符合 USD、交易時段結束時間等於 XNYS 該日收盤、報價時間位於收盤至收盤後5分鐘、執行時間已過收盤1小時，且價格為正且有限並在當日日線高低範圍內（允許0.011美元的報價精度差異）。盤中末筆、其他日期、盤後價格或不能核對的行情一律不用。
+
+這是 Yahoo 一般行情在收盤／收盤競價時段的報價補值，與直接取得完整日線有所區別，並不宣稱是交易所認證收盤價。當前最後收盤日無後續配息／拆分，該日調整價採相同價格；不調整其他歷史價格、不以前一日價格補洞、不推估過去缺價，也不降低發布門檻。正常收盤資料不覆寫。
+
+報表顯示補值檔數，`price_recoveries.csv` 與 `run_metadata.json` 保存代碼、日期、報價UTC時間、來源及價格；未能核對的標的照常列在排除清單。Actions 失敗紀錄亦會列出排除標的及原因，方便診斷。

@@ -1,5 +1,7 @@
 """取得已完成的美股交易日與 Yahoo 配息／拆分調整行情。"""
 from datetime import timedelta
+import math
+import logging
 
 import exchange_calendars as xcals
 import pandas as pd
@@ -31,9 +33,33 @@ def extract_close(frame, field="Close"):
     raise ValueError("行情缺少調整後 Close 欄位")
 
 
-def download_prices(tickers, session, with_market_data=False):
+def _closing_quote(ticker, session, low, high):
+    """僅接受同交易日收盤／收盤競價時間的美元一般行情，不採盤中末筆。"""
+    calendar = xcals.get_calendar("XNYS")
+    close = calendar.session_close(session)
+    if pd.Timestamp.now(tz="UTC") < close + pd.Timedelta(hours=1):
+        return None
+    if not all(math.isfinite(float(value)) and float(value) > 0 for value in [low, high]) or low > high:
+        return None
+    try:
+        metadata = yf.Ticker(ticker).get_history_metadata()
+        price = float(metadata['regularMarketPrice'])
+        stamp = pd.Timestamp(metadata['regularMarketTime'], unit='s', tz='UTC')
+        period_end = pd.Timestamp(metadata['currentTradingPeriod']['regular']['end'], unit='s', tz='UTC')
+        if (metadata.get('currency') != 'USD' or period_end != close
+                or not close <= stamp <= close + pd.Timedelta(minutes=5)
+                or not math.isfinite(price) or price <= 0
+                or not low - 0.011 <= price <= high + 0.011):
+            return None
+        return price, stamp.isoformat()
+    except Exception as exc:
+        logging.warning("%s 收盤行情補查失敗（%s），維持缺值", ticker, type(exc).__name__)
+        return None
+
+
+def download_prices(tickers, session, with_market_data=False, recovery_log=None):
     session = pd.Timestamp(session)
-    fields = ['Adj Close', 'Volume', 'Close'] if with_market_data else ['Close']
+    fields = ['Adj Close', 'Volume', 'Close', 'Low', 'High'] if with_market_data else ['Close']
     collections = {field: [] for field in fields}
 
     def download(batch):
@@ -76,5 +102,27 @@ def download_prices(tickers, session, with_market_data=False):
     sessions = calendar.sessions_in_range(session - timedelta(days=730), session).tz_localize(None)
     frames = {field: frame.reindex(sessions) for field, frame in frames.items()}
     if with_market_data:
+        for ticker in tickers:
+            # 只補最新一日同時缺少調整／未調整收盤，過去缺日絕不推估。
+            if (ticker not in frames['Adj Close'] or ticker not in frames['Close']
+                    or not pd.isna(frames['Adj Close'].at[session, ticker])
+                    or not pd.isna(frames['Close'].at[session, ticker])):
+                continue
+            low = frames['Low'].at[session, ticker] if ticker in frames['Low'] else float('nan')
+            high = frames['High'].at[session, ticker] if ticker in frames['High'] else float('nan')
+            quote = _closing_quote(ticker, session, low, high)
+            if quote is None:
+                continue
+            price, stamp = quote
+            # 當前最後收盤日尚無後續配息／拆分，當日調整價等於未調整價。
+            frames['Adj Close'].at[session, ticker] = price
+            frames['Close'].at[session, ticker] = price
+            record = {'ticker': ticker, 'data_date': session.date().isoformat(),
+                      'source': 'Yahoo regularMarketPrice at closing session',
+                      'quote_time_utc': stamp, 'close': price,
+                      'adjusted_close': price, 'adjustment_basis': 'latest session, factor 1'}
+            if recovery_log is not None:
+                recovery_log.append(record)
+            logging.warning("%s %s：日線收盤缺值，採同日收盤時間一般行情 %s（%s）", ticker, session.date(), price, stamp)
         return frames['Adj Close'], frames['Volume'], frames['Close']
     return frames['Close']

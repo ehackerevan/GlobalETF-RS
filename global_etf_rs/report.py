@@ -84,6 +84,8 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     states = ''.join(f'<option>{escape(str(state))}</option>' for state in sorted(result.get('trade_state', pd.Series(dtype=str)).dropna().unique()) if state != '基準')
     quality = quality or {'status': '未提供完整母體', 'coverage_pct': 100 * (len(result)-1) / max(1,len(result)+len(excluded)-1), 'publishable': False, 'categories': []}
     quality_label = f"{quality['status']} · 可計算 {quality['coverage_pct']:.1f}% · " + ('達發布門檻' if quality['publishable'] else '未達發布門檻／人工檢視')
+    if quality.get('price_recovery_count', 0):
+        quality_label += f" · {quality['price_recovery_count']} 檔日線缺收盤，採同日收盤時間一般行情補值（詳見補值紀錄）"
     quality_table = pd.DataFrame(quality['categories']).rename(columns={'category':'分類','expected':'清單檔數','eligible':'合格檔數','coverage_pct':'完整率 %'}).to_html(index=False,border=0,float_format=lambda value:f'{value:.1f}')
     options = ''.join(f'<option>{escape(category)}</option>' for category in sorted(result["category"].unique()) if category != "基準")
     exclusions = excluded.rename(columns=LABELS).to_html(index=False, border=0) if not excluded.empty else "<p>無排除標的。</p>"
