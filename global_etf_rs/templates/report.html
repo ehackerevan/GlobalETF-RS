@@ -7,7 +7,7 @@
 <style>
 :root{--ink:#172b46;--muted:#52657c;--blue:#285ea8;--orange:#c76c23;--line:#dfe7f0}
 *{box-sizing:border-box}body{font:16px system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:#f3f6fa;color:var(--ink)}
-main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)} .quality-warning{padding:12px;background:#fff1d9;border-left:4px solid #c76c23}.risk-chart{min-height:420px}footer{color:var(--muted);font-size:13px;margin-top:24px}
+main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}.sort-button{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;text-align:left;padding:0;cursor:pointer}.sort-button:hover,.sort-button:focus-visible{color:var(--blue);text-decoration:underline}.sort-button span{color:var(--blue);margin-left:3px}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)} .quality-warning{padding:12px;background:#fff1d9;border-left:4px solid #c76c23}.risk-chart{min-height:420px}footer{color:var(--muted);font-size:13px;margin-top:24px}
 @media(max-width:850px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}main{padding:20px 12px}.panel{padding:14px}.controls label{max-width:100%}.chart{min-height:300px}}
 @media print{body{background:white}.controls,.modebar{display:none}.table-wrap,.scroll-chart{max-height:none}.panel{break-inside:avoid}}
 </style>
@@ -166,6 +166,29 @@ function renderHistory(){
  const line={type:'scatter',mode:'lines',name:'RS走勢',showlegend:false,x:sessions,y:sessions.map(date=>lookup.get(date)?.rs_score??null),connectgaps:false,line:{color:positiveColor,width:2},hoverinfo:'skip'};
  return Plotly.react('history-chart',[line,...['observed','reconstructed'].map(kind=>{const group=data.filter(r=>r.snapshot_kind===kind);return {type:'scatter',mode:'markers',name:kind==='observed'?'實際快照':'重建歷史',x:group.map(r=>r.data_date),y:group.map(r=>r.rs_score),marker:{color:kind==='observed'?positiveColor:'#758537',size:8,symbol:kind==='observed'?'circle':'circle-open'},customdata:group.map(r=>[r.universe_id,r.eligible_id]),hovertemplate:'%{x|%Y-%m-%d}<br>RS：%{y:.2f}<br>清單版本：%{customdata[0]}<br>合格母體：%{customdata[1]}<extra>%{fullData.name}</extra>'};})],base,config);
 }
+function sortMomentum(column,button){
+ const table=document.getElementById('momentum'),header=button.closest('th');
+ const ascending=header.getAttribute('aria-sort')!=='ascending';
+ for(const th of table.querySelectorAll('thead th'))th.setAttribute('aria-sort','none');
+ header.setAttribute('aria-sort',ascending?'ascending':'descending');
+ const label=button.childNodes[0].textContent.trim();
+ button.setAttribute('aria-label',`依${label}${ascending?'降':'升'}冪排序`);
+ button.querySelector('span').textContent=ascending?'↑':'↓';
+ const rows=[...table.tBodies[0].rows];
+ const key=row=>row.cells[column].textContent.trim();
+ const missing=value=>!value||['資料不足','—','未知'].includes(value);
+ const numeric=value=>{const number=Number(value.replaceAll(',','').replaceAll('%','').replace(/^\+/,''));return value!==''&&Number.isFinite(number)?number:null;};
+ rows.sort((left,right)=>{
+  const a=key(left),b=key(right),am=missing(a),bm=missing(b);
+  if(am||bm)return am===bm?left.cells[0].textContent.localeCompare(right.cells[0].textContent):(am?1:-1);
+  const an=numeric(a),bn=numeric(b);let order;
+  if(an!==null&&bn!==null)order=an-bn;
+  else order=a.localeCompare(b,'zh-Hant',{numeric:true,sensitivity:'base'});
+  return (ascending?order:-order)||left.cells[0].textContent.localeCompare(right.cells[0].textContent);
+ });
+ table.tBodies[0].append(...rows);
+}
+document.querySelectorAll('#momentum .sort-button').forEach(button=>button.addEventListener('click',()=>sortMomentum(Number(button.dataset.column),button)));
 function renderCorrelation(){
  const corr=payload.correlation;if(!corr){empty('correlation-chart','沒有可用相關性資料');return;}
  const all=Array.from(document.getElementById('correlation-tickers').selectedOptions).map(o=>o.value),symbols=all.slice(0,12);

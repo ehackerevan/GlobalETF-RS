@@ -74,10 +74,13 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     for column in ['above_ma50', 'above_ma200']:
         assessment[column] = assessment[column].map({True: '是', False: '否'})
     assessment_table = assessment.rename(columns=LABELS).to_html(index=False, border=0, table_id='assessment', na_rep='未知', float_format=lambda value: f'{value:,.2f}')
-    momentum_columns = ['ticker','name','rs_change_5d','rs_change_21d','pr_change_5d','pr_change_21d',
-        'history_basis_5d','history_basis_21d','pr_std_21d','history_days_21d','stability_basis',
-        'correlation_spy_63d','most_correlated_ticker','highest_peer_correlation_63d','peer_correlation_samples']
+    momentum_columns = ['ticker', 'name', 'rs_change_5d', 'rs_change_21d', 'pr_change_5d', 'pr_change_21d']
     momentum_table = result.reindex(columns=momentum_columns).rename(columns=LABELS).to_html(index=False,border=0,table_id='momentum',na_rep='資料不足',float_format=lambda value:f'{value:.2f}')
+    sort_index = iter(range(len(momentum_columns)))
+    momentum_table = re.sub(
+        r'<th>(.*?)</th>',
+        lambda match: f'<th scope="col" aria-sort="none"><button type="button" class="sort-button" data-column="{next(sort_index)}" aria-label="依{match.group(1)}升冪排序">{match.group(1)} <span aria-hidden="true">↕</span></button></th>',
+        momentum_table, count=len(momentum_columns))
     history_records = [] if history is None else json.loads(history.to_json(orient='records'))
     history_meta = history_meta or {'snapshot_dates':0,'observed_dates':0,'reconstructed_dates':0}
     history_label = f"保存 {history_meta['snapshot_dates']} 個交易日：實際快照 {history_meta['observed_dates']} 日、重建 {history_meta['reconstructed_dates']} 日"

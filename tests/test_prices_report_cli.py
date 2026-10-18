@@ -103,6 +103,13 @@ def test_embedded_chart_data_matches_rankings_and_trend(tmp_path):
         assert f'id="{chart}"' in html
     assert 'cdn.plot.ly' not in html.split('<script>')[0]
     assert 'Plotly.react' in html
+    momentum=re.search(r'<table[^>]*id="momentum".*?</table>',html,re.S).group(0)
+    assert len(re.findall(r'<th scope="col" aria-sort="none">',momentum))==6
+    assert len(re.findall(r'class="sort-button"',momentum))==6
+    for removed in ['5日比較來源','21日比較來源','21日PR標準差','21日可比快照數',
+                    '穩定性來源','63日對SPY相關','最高相關同儕','63日同儕相關','同儕共同樣本數']:
+        assert removed not in momentum
+    assert 'aria-sort' in html and 'function sortMomentum' in html
 
 
 def test_chart_payload_escapes_script_termination(tmp_path):
