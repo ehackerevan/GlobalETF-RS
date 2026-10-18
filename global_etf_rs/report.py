@@ -86,7 +86,7 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     quality_label = f"{quality['status']} · 可計算 {quality['coverage_pct']:.1f}% · " + ('達發布門檻' if quality['publishable'] else '未達發布門檻／人工檢視')
     if quality.get('price_recovery_count', 0):
         quality_label += f" · {quality['price_recovery_count']} 檔日線缺收盤，採同日收盤時間一般行情補值（詳見補值紀錄）"
-    quality_table = pd.DataFrame(quality['categories']).rename(columns={'category':'分類','expected':'清單檔數','eligible':'合格檔數','coverage_pct':'完整率 %'}).to_html(index=False,border=0,float_format=lambda value:f'{value:.1f}')
+    quality_table = pd.DataFrame(quality['categories']).rename(columns={'category':'分類','expected':'清單檔數','eligible':'合格檔數','minimum_eligible':'發布最低檔數','coverage_pct':'完整率 %'}).to_html(index=False,border=0,float_format=lambda value:f'{value:.1f}')
     options = ''.join(f'<option>{escape(category)}</option>' for category in sorted(result["category"].unique()) if category != "基準")
     exclusions = excluded.rename(columns=LABELS).to_html(index=False, border=0) if not excluded.empty else "<p>無排除標的。</p>"
     payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality, "history": history_records, "history_meta": history_meta, "correlation": correlation}

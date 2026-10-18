@@ -98,3 +98,19 @@ def test_full_history_newer_than_asof_does_not_change_assessment():
     expected=enrich_assessment(result,prices)
     prices.loc[prices.index[-1]+pd.Timedelta(days=1)]=1e9
     pd.testing.assert_frame_equal(enrich_assessment(result,prices),expected)
+
+
+def test_three_ticker_category_allows_two_but_not_one_available():
+    universe=pd.DataFrame({'ticker':['SPY','FXE','FXY','UUP']+[f'A{i}' for i in range(20)],
+                           'category':['基準']+['外匯']*3+['大型']*20})
+    two=universe[universe.ticker.ne('FXY')]
+    quality=coverage_summary(universe,two)
+    fx=next(x for x in quality['categories'] if x['category']=='外匯')
+    assert fx['coverage_pct']==pytest.approx(200/3)
+    assert fx['minimum_eligible']==2 and fx['publishable']
+    assert quality['publishable']
+    one=two[two.ticker.ne('UUP')]
+    quality=coverage_summary(universe,one)
+    fx=next(x for x in quality['categories'] if x['category']=='外匯')
+    assert fx['eligible']==1 and not fx['publishable']
+    assert not quality['publishable']

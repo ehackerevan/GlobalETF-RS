@@ -13,16 +13,20 @@ def coverage_summary(universe, result):
     categories = []
     for category, group in expected.groupby('category'):
         count = len(set(group.ticker) & available)
+        required = 2 if len(group) == 3 else int(np.ceil(MIN_CATEGORY_COVERAGE * len(group)))
         categories.append({'category': category, 'expected': len(group), 'eligible': count,
-                           'coverage_pct': 100 * count / len(group)})
+                           'coverage_pct': 100 * count / len(group), 'minimum_eligible': required,
+                           'minimum_coverage_pct': 100 * required / len(group),
+                           'publishable': count >= required})
     overall = len(available) / len(expected) if len(expected) else 0
     passed = overall >= MIN_OVERALL_COVERAGE and all(
-        row['coverage_pct'] >= 100 * MIN_CATEGORY_COVERAGE for row in categories)
+        row['publishable'] for row in categories)
     return {'expected_count': len(expected), 'eligible_count': len(available),
             'coverage_pct': 100 * overall, 'publishable': passed,
             'status': '完整' if overall == 1 else '部分資料',
             'minimum_overall_pct': 100 * MIN_OVERALL_COVERAGE,
-            'minimum_category_pct': 100 * MIN_CATEGORY_COVERAGE, 'categories': categories}
+            'minimum_category_pct': 100 * MIN_CATEGORY_COVERAGE,
+            'three_ticker_category_minimum_eligible': 2, 'categories': categories}
 
 
 def enrich_assessment(result, prices, volumes=None, raw_prices=None):

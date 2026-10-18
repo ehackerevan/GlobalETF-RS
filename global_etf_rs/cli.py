@@ -52,7 +52,7 @@ def main(argv=None):
         if not excluded.empty:
             print('排除標的：\n' + excluded[['ticker', 'reason', 'valid_price_rows']].to_string(index=False), file=sys.stderr)
         if not quality['publishable'] and not args.allow_partial:
-            raise ValueError(f"資料完整率不足發布門檻：整體 {quality['coverage_pct']:.1f}%，需 >=90% 且每類 >=70%；拒絕覆寫報表")
+            raise ValueError(f"資料完整率不足發布門檻：整體 {quality['coverage_pct']:.1f}%，需整體 >=90%、每類通常 >=70%（恰有3檔時至少2檔）；拒絕覆寫報表")
         result = enrich_assessment(result, prices, volumes, raw_prices)
         result, history, history_meta = update_history(result, universe, prices, args.history or Path(args.output) / 'rs_history.csv')
         result, correlation, correlation_samples, correlation_payload = calculate_correlation(prices, result)
