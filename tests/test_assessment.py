@@ -19,29 +19,22 @@ def fixture(spy_end=2., etf_end=1.5):
     return prices, universe, result
 
 
-@pytest.mark.parametrize('spy_end,etf_end,state',[
-    (2.,3.,'相對強・絕對上漲'),(2.,1.5,'相對非強・絕對上漲'),
-    (.5,.8,'相對強・絕對非上漲'),(2.,.8,'相對非強・絕對非上漲'),
-    (1.,1.,'相對非強・絕對非上漲')])
-def test_four_states_include_relative_strength_while_losing_money(spy_end, etf_end, state):
-    prices, _, result = fixture(spy_end, etf_end)
+def test_assessment_keeps_moving_average_and_drawdown_metrics_without_removed_fields():
+    prices, _, result = fixture(2., 1.5)
     enriched = enrich_assessment(result, prices).set_index('ticker')
-    assert enriched.loc['DBA', 'trade_state'] == state
-    assert enriched.loc['SPY', 'trade_state'] == '基準'
-    assert bool(enriched.loc['DBA', 'above_ma200']) == (etf_end>1)
-    if etf_end<1:
-        assert enriched.loc['DBA', 'max_drawdown_1y_pct'] == pytest.approx((etf_end-1)*100)
+    assert bool(enriched.loc['DBA', 'above_ma200'])
+    assert 'trade_state' not in enriched and 'absolute_momentum_pct' not in enriched
+    assert 'volatility_1y_pct' not in enriched
     assert enriched.loc['DBA', 'data_completeness_pct'] == 100
 
 
-def test_volatility_downside_and_drawdown_match_daily_price_path():
+def test_downside_risk_and_drawdown_match_daily_price_path():
     prices, universe, _ = fixture()
     prices['DBA'] = 100.
     prices.iloc[-3:, prices.columns.get_loc('DBA')] = [200., 100., 150.]
     result,_ = calculate(prices,universe,prices.index[-1])
     row = enrich_assessment(result,prices).set_index('ticker').loc['DBA']
     returns = np.r_[np.zeros(249),1.,-.5,.5]
-    assert row.volatility_1y_pct == pytest.approx(np.std(returns,ddof=1)*np.sqrt(252)*100)
     assert row.downside_risk_1y_pct == pytest.approx(50.)
     assert row.max_drawdown_1y_pct == pytest.approx(-50.)
     assert row.current_drawdown_1y_pct == pytest.approx(-25.)

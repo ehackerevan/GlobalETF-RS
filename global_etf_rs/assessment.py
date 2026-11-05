@@ -51,17 +51,9 @@ def enrich_assessment(result, prices, volumes=None, raw_prices=None):
         ticker = row['ticker']
         close = prices[ticker]
         returns = close.pct_change(fill_method=None).dropna()
-        volatility = returns.std(ddof=1) * np.sqrt(252) * 100
         downside = np.sqrt(np.mean(np.minimum(returns.to_numpy(), 0) ** 2)) * np.sqrt(252) * 100
         drawdowns = (close / close.cummax() - 1) * 100
         ma50, ma200 = close.tail(50).mean(), close.tail(200).mean()
-        absolute = sum(weight * row[f'return_{window}d_pct'] for window, weight in
-                       [(63, .4), (126, .2), (189, .2), (252, .2)])
-        relative_strong, absolute_up = row['rs_score'] > 0, absolute > 0
-        state = ('相對強・絕對上漲' if absolute_up else '相對強・絕對非上漲') if relative_strong else (
-            '相對非強・絕對上漲' if absolute_up else '相對非強・絕對非上漲')
-        if ticker == 'SPY':
-            state = '基準'
         turnover = np.nan
         if volumes is not None and raw_prices is not None and ticker in volumes and ticker in raw_prices:
             volume = pd.to_numeric(volumes[ticker].tail(20), errors='coerce')
@@ -70,11 +62,10 @@ def enrich_assessment(result, prices, volumes=None, raw_prices=None):
                 turnover = float((volume * raw).mean())
         liquidity = '未知' if not np.isfinite(turnover) else ('低成交額' if turnover < MIN_DOLLAR_VOLUME else '成交額達門檻')
         values.append({
-            'absolute_momentum_pct': absolute, 'trade_state': state,
             'above_ma50': close.iloc[-1] > ma50, 'above_ma200': close.iloc[-1] > ma200,
             'ma50_gap_pct': (close.iloc[-1] / ma50 - 1) * 100,
             'ma200_gap_pct': (close.iloc[-1] / ma200 - 1) * 100,
-            'volatility_1y_pct': volatility, 'downside_risk_1y_pct': downside,
+            'downside_risk_1y_pct': downside,
             'max_drawdown_1y_pct': drawdowns.min(), 'current_drawdown_1y_pct': drawdowns.iloc[-1],
             'avg_dollar_volume_20d': turnover, 'liquidity_status': liquidity,
             'data_completeness_pct': 100 * close.notna().sum() / 253,

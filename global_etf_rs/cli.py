@@ -8,8 +8,8 @@ import pandas as pd
 
 from .calculator import calculate
 from .history import update_history
-from .correlation import calculate_correlation
 from .assessment import enrich_assessment, coverage_summary
+from .forward_validation import summarize_forward_returns
 from .prices import download_prices, latest_closed_session
 from .report import write_reports
 from .universe import load_universe
@@ -55,8 +55,8 @@ def main(argv=None):
             raise ValueError(f"資料完整率不足發布門檻：整體 {quality['coverage_pct']:.1f}%，需整體 >=90%、每類通常 >=70%（恰有3檔時至少2檔）；拒絕覆寫報表")
         result = enrich_assessment(result, prices, volumes, raw_prices)
         result, history, history_meta = update_history(result, universe, prices, args.history or Path(args.output) / 'rs_history.csv')
-        result, correlation, correlation_samples, correlation_payload = calculate_correlation(prices, result)
-        path = write_reports(result, excluded, args.output, prices=prices, quality=quality, history=history, history_meta=history_meta, correlation=correlation_payload)
+        forward_validation, forward_meta = summarize_forward_returns(history, prices.loc[:session])
+        path = write_reports(result, excluded, args.output, prices=prices, quality=quality, history=history, history_meta=history_meta, forward_validation=forward_validation, forward_meta=forward_meta)
         Path(args.output).mkdir(parents=True, exist_ok=True)
         prices.reindex(columns=universe.ticker).loc[:session].to_csv(Path(args.output) / "adjusted_close.csv", index_label="Date")
         for filename, frame in [('volume.csv', volumes), ('unadjusted_close.csv', raw_prices)]:
@@ -65,8 +65,9 @@ def main(argv=None):
             else:
                 (Path(args.output) / filename).unlink(missing_ok=True)
         history.to_csv(Path(args.output) / 'rs_history.csv', index=False, encoding='utf-8-sig')
-        correlation.to_csv(Path(args.output) / 'correlation_63d.csv', index_label='ticker')
-        correlation_samples.to_csv(Path(args.output) / 'correlation_samples.csv', index_label='ticker')
+        forward_validation.to_csv(Path(args.output) / 'forward_returns.csv', index=False, encoding='utf-8-sig')
+        for obsolete in ['correlation_63d.csv', 'correlation_samples.csv']:
+            (Path(args.output) / obsolete).unlink(missing_ok=True)
         recovery_columns = ['ticker', 'data_date', 'source', 'quote_time_utc', 'close', 'adjusted_close', 'adjustment_basis']
         pd.DataFrame(recoveries, columns=recovery_columns).to_csv(Path(args.output) / 'price_recoveries.csv', index=False, encoding='utf-8-sig')
         universe.to_csv(Path(args.output) / "universe.csv", index=False, encoding="utf-8-sig")
@@ -81,10 +82,11 @@ def main(argv=None):
             "excluded_count": len(excluded),
             "data_quality": quality,
             "history": history_meta,
-            "correlation": {"window_sessions": 63, "min_samples": 60},
-            "assessment": {"volatility_window": 252, "moving_averages": [50, 200],
+            "assessment": {"moving_averages": [50, 200],
                            "liquidity_window": 20, "minimum_dollar_volume": 1000000,
                            "liquidity_basis": "未調整收盤價乘成交股數，非實際成交金額或價差"},
+            "forward_validation": {"horizons_sessions": [5, 21, 63], "snapshot_kind": "observed_only",
+                                   "relative_return": "ETF return minus SPY return"},
         }
         (Path(args.output) / "run_metadata.json").write_text(
             json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")

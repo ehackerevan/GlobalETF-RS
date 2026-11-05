@@ -18,11 +18,8 @@ LABELS = {
     "pr_change_5d": "PR5日變化", "pr_change_21d": "PR21日變化",
     "history_basis_5d": "5日比較來源", "history_basis_21d": "21日比較來源",
     "pr_std_21d": "21日PR標準差", "history_days_21d": "21日可比快照數",
-    "stability_basis": "穩定性來源", "correlation_spy_63d": "63日對SPY相關",
-    "most_correlated_ticker": "最高相關同儕", "highest_peer_correlation_63d": "63日同儕相關",
-    "peer_correlation_samples": "同儕共同樣本數",
-    "valid_price_rows": "253日內有效價格筆數", "trade_state": "強弱狀態", "absolute_momentum_pct": "加權絕對動能 %",
-    "volatility_1y_pct": "一年年化波動 %", "downside_risk_1y_pct": "一年下行風險 %",
+    "stability_basis": "穩定性來源", "valid_price_rows": "253日內有效價格筆數",
+    "downside_risk_1y_pct": "一年下行風險 %",
     "max_drawdown_1y_pct": "一年最大回撤 %", "current_drawdown_1y_pct": "距一年高點 %",
     "ma50_gap_pct": "50日均線乖離 %", "ma200_gap_pct": "200日均線乖離 %",
     "above_ma50": "站上50日均線", "above_ma200": "站上200日均線",
@@ -53,7 +50,7 @@ def _trend_payload(prices, result):
     return {"dates": frame.index.strftime("%Y-%m-%d").tolist(), "series": series}
 
 
-def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, correlation=None):
+def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, forward_validation=None, forward_meta=None):
     folder = Path(output_dir)
     folder.mkdir(parents=True, exist_ok=True)
     result.to_csv(folder / "rankings.csv", index=False, encoding="utf-8-sig")
@@ -61,14 +58,14 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     columns = ["ticker", "name", "category", "rs_score", "rs_rank", "category_rank",
                "outperforms_spy", "relative_63d_pct", "relative_126d_pct",
                "relative_189d_pct", "relative_252d_pct", "exposure", "structure"]
-    columns += ['trade_state', 'absolute_momentum_pct', 'volatility_1y_pct', 'max_drawdown_1y_pct', 'liquidity_status']
+    columns += ['max_drawdown_1y_pct', 'liquidity_status']
     display = result.reindex(columns=columns).copy()
     display["outperforms_spy"] = display["outperforms_spy"].map({True: "是", False: "否"})
     display.loc[display["ticker"].eq("SPY"), "outperforms_spy"] = "基準"
     table = display.rename(columns=LABELS).to_html(
         index=False, border=0, table_id="rankings", na_rep="—", float_format=lambda value: f"{value:.2f}")
-    assessment_columns = ['ticker', 'name', 'trade_state', 'absolute_momentum_pct', 'above_ma50', 'above_ma200',
-        'ma50_gap_pct', 'ma200_gap_pct', 'volatility_1y_pct', 'downside_risk_1y_pct',
+    assessment_columns = ['ticker', 'name', 'above_ma50', 'above_ma200',
+        'ma50_gap_pct', 'ma200_gap_pct', 'downside_risk_1y_pct',
         'max_drawdown_1y_pct', 'current_drawdown_1y_pct', 'avg_dollar_volume_20d', 'liquidity_status', 'data_completeness_pct']
     assessment = result.reindex(columns=assessment_columns).copy()
     for column in ['above_ma50', 'above_ma200']:
@@ -84,7 +81,6 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     history_records = [] if history is None else json.loads(history.to_json(orient='records'))
     history_meta = history_meta or {'snapshot_dates':0,'observed_dates':0,'reconstructed_dates':0}
     history_label = f"保存 {history_meta['snapshot_dates']} 個交易日：實際快照 {history_meta['observed_dates']} 日、重建 {history_meta['reconstructed_dates']} 日"
-    states = ''.join(f'<option>{escape(str(state))}</option>' for state in sorted(result.get('trade_state', pd.Series(dtype=str)).dropna().unique()) if state != '基準')
     quality = quality or {'status': '未提供完整母體', 'coverage_pct': 100 * (len(result)-1) / max(1,len(result)+len(excluded)-1), 'publishable': False, 'categories': []}
     quality_label = f"{quality['status']} · 可計算 {quality['coverage_pct']:.1f}% · " + ('達發布門檻' if quality['publishable'] else '未達發布門檻／人工檢視')
     if quality.get('price_recovery_count', 0):
@@ -92,16 +88,21 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     quality_table = pd.DataFrame(quality['categories']).rename(columns={'category':'分類','expected':'清單檔數','eligible':'合格檔數','minimum_eligible':'發布最低檔數','coverage_pct':'完整率 %'}).to_html(index=False,border=0,float_format=lambda value:f'{value:.1f}')
     options = ''.join(f'<option>{escape(category)}</option>' for category in sorted(result["category"].unique()) if category != "基準")
     exclusions = excluded.rename(columns=LABELS).to_html(index=False, border=0) if not excluded.empty else "<p>無排除標的。</p>"
-    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality, "history": history_records, "history_meta": history_meta, "correlation": correlation}
+    forward_validation = forward_validation if forward_validation is not None else pd.DataFrame()
+    forward_table = forward_validation.to_html(index=False, border=0, table_id='forward-validation', na_rep='—', float_format=lambda value: f'{value:.2f}') if not forward_validation.empty else '<p>尚無已完成觀察期間的實際 RS 快照。</p>'
+    forward_meta = forward_meta or {'observed_snapshot_dates': 0, 'evaluated_snapshot_dates': 0}
+    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality, "history": history_records, "history_meta": history_meta, "forward_validation": json.loads(forward_validation.to_json(orient='records'))}
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     values = {
         "PLOTLY": get_plotlyjs(), "DATA": data, "TABLE": table,
         "DATE": escape(str(result["data_date"].iloc[0])), "OPTIONS": options,
         "EXCLUSIONS": exclusions, "EXCLUDED_COUNT": str(len(excluded)),
         "UNIVERSE_COUNT": str(len(result) - 1), "ASSESSMENT_TABLE": assessment_table,
-        "STATES": states, "QUALITY_LABEL": escape(quality_label), "QUALITY_TABLE": quality_table,
+        "QUALITY_LABEL": escape(quality_label), "QUALITY_TABLE": quality_table,
         "QUALITY_CLASS": 'note' if quality['status'] == '完整' else 'quality-warning',
         "MOMENTUM_TABLE": momentum_table, "HISTORY_LABEL": escape(history_label),
+        "FORWARD_TABLE": forward_table,
+        "FORWARD_NOTE": escape(f"僅使用實際保存快照；已觀察 {forward_meta['observed_snapshot_dates']} 日，至少一個期間已有後續價格可驗證 {forward_meta['evaluated_snapshot_dates']} 日。相對報酬為 ETF 報酬減 SPY 報酬，重疊期間樣本不獨立，不含交易成本。"),
         "CREATED_AT": pd.Timestamp.now(tz='Asia/Taipei').strftime('%Y-%m-%d %H:%M 台灣時間'),
     }
     template = Path(__file__).with_name("templates").joinpath("report.html").read_text(encoding="utf-8")
