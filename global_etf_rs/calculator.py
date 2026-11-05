@@ -61,7 +61,6 @@ def calculate(prices, universe, expected_session):
             relative_returns.append(relative)
         row["rs_score"] = float(np.dot(relative_returns, WEIGHTS) * 100)
         row["outperforms_spy"] = row["rs_score"] > 0
-        row["rs_line_1y"] = 100 * (1 + relative_returns[-1])
         rows.append(row)
     result = pd.DataFrame(rows)
     if result.empty:

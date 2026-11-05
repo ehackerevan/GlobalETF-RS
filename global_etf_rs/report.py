@@ -12,7 +12,7 @@ LABELS = {
     "ticker": "代碼", "name": "名稱", "category": "分類", "exposure": "曝險說明",
     "structure": "結構", "data_date": "資料日", "adjusted_close": "調整後價格",
     "rs_score": "加權 RS 分數", "rs_rank": "全母體 PR", "category_rank": "分類 PR",
-    "outperforms_spy": "加權跑贏 SPY", "rs_line_1y": "一年 RS 線（起點100）",
+    "outperforms_spy": "加權跑贏 SPY",
     "reason": "排除原因",
     "rs_change_5d": "RS分數5日變化", "rs_change_21d": "RS分數21日變化",
     "pr_change_5d": "PR5日變化", "pr_change_21d": "PR21日變化",
@@ -32,7 +32,7 @@ for window in [63, 126, 189, 252]:
 
 
 def _trend_payload(prices, result):
-    """保留同一資料日的最近一年相對價格，錨點正規化為 100。"""
+    """回傳快照圖使用的交易日座標。"""
     if prices is None or prices.empty:
         return {"dates": [], "series": {}}
     end = pd.Timestamp(result["data_date"].iloc[0])
@@ -41,13 +41,7 @@ def _trend_payload(prices, result):
     calendar = xcals.get_calendar("XNYS")
     sessions = calendar.sessions_in_range(calendar.session_offset(end, -252), end).tz_localize(None)
     frame = frame.reindex(sessions)
-    series = {}
-    for ticker in result["ticker"]:
-        if ticker == "SPY" or ticker not in frame:
-            continue
-        relative = frame[ticker] / frame["SPY"]
-        series[ticker] = (100 * relative / relative.iloc[0]).tolist()
-    return {"dates": frame.index.strftime("%Y-%m-%d").tolist(), "series": series}
+    return {"dates": frame.index.strftime("%Y-%m-%d").tolist()}
 
 
 def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, forward_validation=None, forward_meta=None):
@@ -91,7 +85,7 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     forward_validation = forward_validation if forward_validation is not None else pd.DataFrame()
     forward_table = forward_validation.to_html(index=False, border=0, table_id='forward-validation', na_rep='—', float_format=lambda value: f'{value:.2f}') if not forward_validation.empty else '<p>尚無已完成觀察期間的實際 RS 快照。</p>'
     forward_meta = forward_meta or {'observed_snapshot_dates': 0, 'evaluated_snapshot_dates': 0}
-    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "quality": quality, "history": history_records, "history_meta": history_meta, "forward_validation": json.loads(forward_validation.to_json(orient='records'))}
+    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "history": history_records, "forward_validation": json.loads(forward_validation.to_json(orient='records'))}
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     values = {
         "PLOTLY": get_plotlyjs(), "DATA": data, "TABLE": table,

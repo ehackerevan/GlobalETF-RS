@@ -3,192 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>全球 ETF RS｜{{DATE}}</title>
+<title>全球 ETF 強弱報告｜{{DATE}}</title>
 <style>
-:root{--ink:#172b46;--muted:#52657c;--blue:#285ea8;--orange:#c76c23;--line:#dfe7f0}
-*{box-sizing:border-box}body{font:16px system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:#f3f6fa;color:var(--ink)}
-main{max-width:1480px;margin:auto;padding:30px 24px 50px}h1{font-size:clamp(24px,4vw,34px);margin:8px 0 12px}h2{font-size:20px;margin:0 0 8px}h3{font-size:17px}p{line-height:1.65}.eyebrow{color:var(--blue);font-size:13px;letter-spacing:2px}.meta,.caption{color:var(--muted);font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}.card span{display:block;color:var(--muted);font-size:14px}.card strong{display:block;font-size:29px;margin:8px 0}.card small{color:var(--muted)}.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}label{font-size:14px}select,input[type=search]{padding:10px;border:1px solid #aebed1;border-radius:6px;background:white;color:var(--ink);font:inherit;max-width:100%}input[type=checkbox]{accent-color:var(--blue)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{min-width:0;margin-bottom:20px}.grid .panel{margin-bottom:0}.chart{width:100%;min-height:340px}.scroll-chart{max-height:760px;overflow-y:auto}.wide{margin-top:20px}.table-wrap{overflow:auto;max-height:680px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:14px}th,td{padding:11px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}.sort-button{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;text-align:left;padding:0;cursor:pointer}.sort-button:hover,.sort-button:focus-visible{color:var(--blue);text-decoration:underline}.sort-button span{color:var(--blue);margin-left:3px}tbody tr:hover{background:#f5f8fd}.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted);margin:12px 0}.swatch{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:5px}.note{font-size:14px;color:var(--muted)}a{color:var(--blue)}details summary{cursor:pointer;font-weight:600}noscript{display:block;padding:15px;background:#fff3df}.empty{padding:60px 20px;text-align:center;color:var(--muted)} .quality-warning{padding:12px;background:#fff1d9;border-left:4px solid #c76c23}footer{color:var(--muted);font-size:13px;margin-top:24px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}main{padding:20px 12px}.panel{padding:14px}.controls label{max-width:100%}.chart{min-height:300px}}
-@media print{body{background:white}.controls,.modebar{display:none}.table-wrap,.scroll-chart{max-height:none}.panel{break-inside:avoid}}
+:root{--ink:#182b45;--muted:#61728a;--blue:#285ea8;--red:#bd6148;--line:#e1e8f0;--paper:#f5f7fa}
+*{box-sizing:border-box}body{font:16px/1.55 system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:var(--paper);color:var(--ink)}main{max-width:1180px;margin:auto;padding:28px 22px 48px}h1{font-size:clamp(28px,4vw,38px);line-height:1.2;margin:6px 0 10px}h2{font-size:20px;margin:0 0 4px}h3{font-size:17px;margin:18px 0 5px}p{margin:6px 0;line-height:1.6}.eyebrow{font-size:12px;color:var(--blue);font-weight:750;letter-spacing:.1em}.meta,.caption,.note{color:var(--muted);font-size:14px}.caption{margin-bottom:14px}.header{padding:6px 0 18px}.how{margin:12px 0 20px;padding:13px 15px;background:#eaf2fb;border:1px solid #d6e6f5;border-radius:11px}.how strong{display:block}.how span{color:#465b73;font-size:14px}.quality{padding:10px 13px;border-radius:8px}.quality-warning{background:#fff1d9;border-left:4px solid #c76c23}.note{font-size:13px}.controls,.panel,.card{background:white;border:1px solid var(--line);border-radius:12px}.controls{padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 15px}label{font-size:14px}select,input[type=search]{padding:10px 11px;border:1px solid #b9c6d5;border-radius:8px;background:white;color:var(--ink);font:inherit;max-width:100%}select:focus,input:focus{outline:3px solid #285ea824;border-color:var(--blue)}.search{flex:1;min-width:220px}.search input{width:100%}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}.card{padding:15px 17px}.card span{display:block;font-size:13px;color:var(--muted)}.card strong{display:block;font-size:25px;margin:4px 0}.card small{color:var(--muted);font-size:12px}.panel{padding:19px;margin:15px 0}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:10px 0}.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.chart{width:100%;min-height:370px}.scroll-chart{max-height:650px;overflow:auto}.table-wrap{overflow:auto;max-height:600px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:13px}th,td{padding:10px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}.sort-button{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;text-align:left;padding:0;cursor:pointer}.sort-button:hover,.sort-button:focus-visible{color:var(--blue);text-decoration:underline}.sort-button span{color:var(--blue);margin-left:3px}tbody tr:hover{background:#f5f8fd}.details{background:white;border:1px solid var(--line);border-radius:12px;margin:15px 0}.details>summary{padding:16px 18px;cursor:pointer;font-weight:720;list-style:none}.details>summary::-webkit-details-marker{display:none}.details>summary:after{content:'＋';float:right;color:var(--blue)}.details[open]>summary:after{content:'－'}.details-body{padding:0 18px 18px}.subsection{padding-top:14px;margin-top:14px;border-top:1px solid var(--line)}.empty{padding:32px;text-align:center;color:var(--muted)}a{color:var(--blue)}.download{line-height:2}.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:20px}
+@media(max-width:760px){main{padding:20px 12px 36px}.cards{grid-template-columns:1fr 1fr}.panel{padding:14px}.controls{align-items:stretch}.controls label{flex:1}.search{min-width:100%}.chart{min-height:300px}.panel-head{display:block}}
+@media print{body{background:white}.controls,.modebar{display:none}.details:not([open]){display:none}.table-wrap,.scroll-chart{max-height:none}.panel,.card{break-inside:avoid}}
 </style>
 <script>{{PLOTLY}}</script>
 </head>
 <body><main>
-<header><div class="eyebrow">GLOBAL ETF · RELATIVE STRENGTH</div>
-<h1>全球跨資產 ETF 相對強度</h1>
-<p class="meta">基準 SPY · 完整收盤日 {{DATE}} · 合格 ETF {{UNIVERSE_COUNT}} 檔 · 排除 {{EXCLUDED_COUNT}} 檔</p>
-<p class="{{QUALITY_CLASS}}">資料狀態：{{QUALITY_LABEL}} · 報表產生：{{CREATED_AT}}</p>
-<p class="note">以美元配息／拆分調整行情比較。RS 分數大於 0 代表加權期間跑贏 SPY；PR 表示 ETF 母體內的排名，兩者分開閱讀。</p></header>
-<div class="controls panel" aria-label="報表篩選">
-<label>分類 <select id="category"><option value="">全部分類</option>{{OPTIONS}}</select></label>
-<label>搜尋 <input type="search" id="search" placeholder="代碼、名稱或曝險"></label>
-<label><input type="checkbox" id="strong"> 只看加權跑贏 SPY</label>
-<label><input type="checkbox" id="liquid"> 只看成交額達門檻</label>
-<label>圖表排序 <select id="order"><option value="top">最強優先</option><option value="bottom">最弱優先</option></select></label>
-<label>圖表檔數 <select id="limit"><option value="15">15 檔</option><option value="30">30 檔</option><option value="all">全部</option></select></label>
+<header class="header">
+<div class="eyebrow">GLOBAL ETF · 相對 SPY 比較</div>
+<h1>全球市場強弱報告</h1>
+<p class="meta">資料日期：{{DATE}}　·　比較基準：SPY　·　納入 {{UNIVERSE_COUNT}} 檔 ETF　·　未納入 {{EXCLUDED_COUNT}} 檔</p>
+<p class="quality {{QUALITY_CLASS}}">資料狀態：{{QUALITY_LABEL}}　·　更新時間：{{CREATED_AT}}</p>
+<div class="how"><strong>怎麼看：分數在 0 以上，代表這檔 ETF 最近跑贏 SPY；低於 0，代表落後 SPY。</strong><span>分數用來比較強弱，不是買進或賣出訊號。</span></div>
+</header>
+<div class="controls" aria-label="篩選 ETF">
+<label>類別<br><select id="category"><option value="">全部類別</option>{{OPTIONS}}</select></label>
+<label class="search">搜尋代碼或名稱<br><input type="search" id="search" placeholder="例如：黃金、印度、債券" aria-label="搜尋代碼或名稱"></label>
+<label>排列順序<br><select id="order"><option value="top">較強的排前面</option><option value="bottom">較弱的排前面</option></select></label>
 </div>
-<noscript>請啟用 JavaScript 查看互動圖表。下方資料表仍可閱讀。</noscript>
+<noscript>請啟用 JavaScript 查看互動圖表。下方排名資料表仍可閱讀。</noscript>
 <div class="cards" aria-live="polite">
-<div class="card"><span>目前篩選 ETF</span><strong id="count">—</strong><small>SPY 不計入</small></div>
-<div class="card"><span>加權跑贏 SPY</span><strong id="positive">—</strong><small id="positive-note">—</small></div>
-<div class="card"><span>RS 分數中位數</span><strong id="median">—</strong><small>目前篩選母體</small></div>
-<div class="card"><span>篩選中最強 ETF</span><strong id="leader">—</strong><small id="leader-note">—</small></div>
+<div class="card"><span>目前符合條件</span><strong id="count">—</strong><small>不含 SPY 基準</small></div>
+<div class="card"><span>目前跑贏 SPY</span><strong id="positive">—</strong><small id="positive-note">—</small></div>
+<div class="card"><span>目前最強</span><strong id="leader">—</strong><small id="leader-note">—</small></div>
+<div class="card"><span>目前最弱</span><strong id="laggard">—</strong><small id="laggard-note">—</small></div>
 </div>
-<div class="grid">
-<section class="panel"><h2>ETF 加權 RS 排名</h2><p class="caption" id="ranking-caption"></p><div class="legend"><span><i class="swatch" style="background:#285ea8"></i>正分數</span><span><i class="swatch" style="background:#c76c23"></i>負分數</span><span>0 為 SPY 基準</span></div><div class="scroll-chart"><div id="ranking-chart" class="chart" role="img" aria-label="ETF 加權相對強度排名長條圖"></div></div></section>
-<section class="panel"><h2>分類強度比較</h2><p class="caption">目前篩選結果的 RS 分數中位數；標示每類 ETF 檔數，非資產類別指數報酬。</p><div id="category-chart" class="chart" role="img" aria-label="分類 RS 中位數長條圖"></div></section>
-</div>
-<section class="panel wide"><h2>各期間相對 SPY 報酬</h2><p class="caption" id="heatmap-caption"></p><div class="legend" id="heatmap-scale"></div><div class="scroll-chart"><div id="heatmap-chart" class="chart" role="img" aria-label="ETF 各期間相對 SPY 報酬熱力圖"></div></div></section>
-<section class="panel"><h2>一年相對強度走勢</h2><label>選擇標的 <select id="ticker"></select></label><p class="caption">ETF 調整價格 ÷ SPY 調整價格，起點正規化為 100。高於 100 表示從起點至當日跑贏 SPY；不是 ETF 價格或加權 RS 分數。</p><div id="trend-chart" class="chart" role="img" aria-label="一年相對 SPY 強度走勢"></div></section>
-<section class="panel"><h2>RS 動能變化與排名穩定性</h2><p class="caption">{{HISTORY_LABEL}}。5／21日為交易日；不同排名母體不比較 PR，缺少確切比較日顯示資料不足。21日 PR 標準差越低僅表示名次較穩定，不代表交易風險較低。</p><div class="table-wrap">{{MOMENTUM_TABLE}}</div></section>
-<section class="panel"><h2>近三個月 RS 快照走勢</h2><label>觀察標的 <select id="history-ticker"></select></label><p class="caption">折線顯示資料日往前近三個月。實心點為實際快照，空心點為重建歷史；滑鼠移入可查看來源與母體版本。缺少快照的交易日會斷線，重建歷史並非策略回測。</p><div id="history-chart" class="chart" role="img" aria-label="每日RS快照分數與來源"></div></section>
-<section class="panel"><h2>RS 排名分組後續報酬</h2><p class="caption">{{FORWARD_NOTE}} 各組依快照當日全母體 PR 分成五組；正值代表平均跑贏 SPY。這是歷史條件統計，不能視為預測或投資策略績效。</p><div id="forward-chart" class="chart" role="img" aria-label="RS分組後續相對SPY平均報酬"></div><div class="table-wrap">{{FORWARD_TABLE}}</div></section>
-<section class="panel"><h2>交易觀察指標</h2><p class="caption">均線使用調整價格；成交額使用未調整收盤價 × 成交股數的 20 日平均。達門檻僅指近似日均至少 100 萬美元，不保證價差、深度或成交。未知表示資料不足。</p><div class="table-wrap">{{ASSESSMENT_TABLE}}</div></section>
-<section class="panel"><h2>完整排名資料</h2><p class="caption">表格顯示全部符合篩選的標的，圖表檔數不限制表格。PR 依原始合格母體計算，篩選後不重算；SPY 參考列保持顯示。</p><div class="table-wrap">{{TABLE}}</div></section>
-<section class="panel"><details><summary>計算方法與資料限制</summary>
-<p class="note">相對 N 日報酬＝(ETF 今日／ETF N 日前) ÷ (SPY 今日／SPY N 日前) − 1。加權 RS 分數＝相對 63／126／189／252 交易日報酬分別以 40%／20%／20%／20% 加權再乘 100。圖表的「月」為約略期間，以交易日為準。</p>
-<p class="note">全母體 PR 及分類 PR 為 1–99 百分位，SPY 不參與排名。分類 PR 母體較小，不能跨分類比較。各國 ETF 含匯率影響，期貨商品含轉倉影響；清單並非所有國家完整覆蓋。最新收盤或完整一年歷史缺失會排除；SPY 缺價則停止計算。</p>
-<p class="note">熱力圖色階以全母體的最大絕對相對報酬對稱設定，篩選時保持固定，避免同一數值變色。分類圖為篩選後 ETF 分數中位數，不代表可投資組合績效。</p>
-<p><a href="rankings.csv" download>下載排名 CSV</a> · <a href="adjusted_close.csv" download>下載調整行情</a> · <a href="price_recoveries.csv" download>收盤補值紀錄 CSV</a> · <a href="run_metadata.json">執行來源紀錄</a> · <a href="rs_history.csv" download>RS歷史快照</a></p>
+<section class="panel" aria-labelledby="ranking-title">
+<div class="panel-head"><div><h2 id="ranking-title">ETF 強弱排名</h2><p class="caption" id="ranking-caption">以同一把尺比較所有類別。藍色代表跑贏 SPY，橘色代表落後。</p></div></div>
+<div class="legend"><span><i class="swatch" style="background:#285ea8"></i>跑贏 SPY</span><span><i class="swatch" style="background:#c76c23"></i>落後 SPY</span><span>中線 = 和 SPY 一樣</span></div>
+<div class="scroll-chart"><div id="ranking-chart" class="chart" role="img" aria-label="ETF 相對 SPY 強弱排名圖"></div></div>
+</section>
+<details class="details" id="moreInfo">
+<summary>更多資訊（完整排名、歷史與風險指標）</summary>
+<div class="details-body">
+<section class="subsection"><h2>完整排名資料</h2><p class="caption">表格已套用上方的搜尋和類別篩選。SPY 只作為比較基準。</p><div class="table-wrap">{{TABLE}}</div></section>
+<section class="subsection"><h2>歷史排名走勢</h2><p class="caption">選一檔 ETF，看它的相對強度分數如何變化。</p><label>選擇 ETF <select id="history-ticker"></select></label><p class="note">空心圓是依目前清單重建的早期資料；不代表當時真的發布過這份排名。</p><div id="history-chart" class="chart" role="img" aria-label="ETF 過去三個月相對強度分數"></div></section>
+<section class="subsection"><h2>過去排名靠前，後來表現如何？</h2><p class="caption">依當時排名分組，比較後續 5、21、63 個交易日和 SPY 的表現。</p><p class="note">{{FORWARD_NOTE}} 歷史資料有限、觀察期間可能重疊，也未扣交易成本；不能當成未來保證或策略績效。</p><div id="forward-chart" class="chart" role="img" aria-label="RS排名分組的後續相對報酬"></div><div class="table-wrap">{{FORWARD_TABLE}}</div></section>
+<section class="subsection"><h2>RS 排名變化</h2><p class="caption">{{HISTORY_LABEL}}。變化是和指定交易日前的快照比較；缺少該日資料時會顯示資料不足。</p><div class="table-wrap">{{MOMENTUM_TABLE}}</div></section>
+<section class="subsection"><h2>風險與流動性指標</h2><p class="caption">用於補充檢視價格回落、均線位置與近似成交額；資料不足時會顯示未知。</p><div class="table-wrap">{{ASSESSMENT_TABLE}}</div></section>
+<section class="subsection"><details><summary>計算方式、資料限制與下載</summary>
+<p class="note">RS 分數使用 63、126、189、252 個交易日的相對 SPY 報酬，權重依序為 40%、20%、20%、20%。分數大於 0 代表加權結果跑贏 SPY。</p>
+<p class="note">不同國家的 ETF 報酬會受匯率影響；商品期貨 ETF 會受轉倉影響。清單不代表完整涵蓋所有市場。相對報酬比較不是投資建議，也沒有模擬交易成本。</p>
+<div class="download"><a href="rankings.csv" download>排名資料</a> · <a href="adjusted_close.csv" download>調整後價格</a> · <a href="rs_history.csv" download>歷史快照</a> · <a href="run_metadata.json">資料來源與更新記錄</a> · <a href="price_recoveries.csv" download>收盤資料補值記錄</a></div>
+<p class="note">採用下一交易日實際成交價格才能估算交易成本。本報表沒有進出場規則、部位配置或策略回測。近似成交額不等於實際成交額、買賣價差或可成交深度。</p>
 </details></section>
-<section class="panel"><details><summary>未納入計算（{{EXCLUDED_COUNT}} 檔）</summary><div class="table-wrap">{{EXCLUSIONS}}</div></details></section>
-<section class="panel"><details><summary>資料完整率與指標定義</summary><div class="table-wrap">{{QUALITY_TABLE}}</div>
-<p class="note">整體合格比例需至少 90%，各分類至少 70%，才可自動發布；未達標保留前次網站。若人工允許部分資料，報表明確標示。資料日期可能為休市前一交易日，請核對頁首；排程失敗也會留下舊報表。</p>
-<p class="note">下行風險為最近一年日報酬負值（正值設零）的均方根 × √252。回撤以最近 253 個收盤及滾動歷史高點計算，並非完整持有期或盤中最大回撤。</p>
-<p class="note">使用下一交易日的實際成交價格才能評估交易成本。本報表尚無進出場規則、部位配置、價差資料或策略回測。歷史重建採目前清單，存在存活者偏差，不能當成過去實際可交易母體的回測。缺乏成交量或未調整價格時不推算流動性。</p>
-</details></section>
-<footer>資料來源：Yahoo Finance／yfinance 美元調整收盤；離線重跑時依提供的調整行情 CSV。圖表程式與資料均內嵌，可離線開啟；檔數控制只影響排名圖與熱力圖。</footer>
+<section class="subsection"><details><summary>資料完整率與未納入標的</summary><div class="table-wrap">{{QUALITY_TABLE}}</div><p class="note">整體完整率需至少 90%，各類通常至少 70%，才會自動更新；資料不完整時網站保留前一次報表。</p><div class="table-wrap">{{EXCLUSIONS}}</div></details></section>
+</div></details>
+<footer class="footer">資料來源：Yahoo Finance 美元調整收盤。圖表和資料均內嵌在網頁中，可離線檢視。</footer>
 </main>
 <script id="report-data" type="application/json">{{DATA}}</script>
 <script>
 'use strict';
 const payload=JSON.parse(document.getElementById('report-data').textContent);
 const rows=payload.rows.filter(r=>r.ticker!=='SPY');
-const periods=[63,126,189,252];
 const positiveColor='#285ea8',negativeColor='#c76c23';
 const config={responsive:true,displaylogo:false,scrollZoom:false,modeBarButtonsToRemove:['lasso2d','select2d'],toImageButtonOptions:{format:'png',scale:2}};
 const safe=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const signed=value=>(value>0?'+':'')+value.toFixed(2);
-const median=values=>{const v=[...values].sort((a,b)=>a-b),i=Math.floor(v.length/2);return v.length?(v.length%2?v[i]:(v[i-1]+v[i])/2):null;};
-const bound=Math.max(1,...rows.flatMap(r=>periods.map(p=>Math.abs(r[`relative_${p}d_pct`]))));
-document.getElementById('heatmap-scale').innerHTML=`<span><i class="swatch" style="background:${negativeColor}"></i>${signed(-bound)}%</span><span><i class="swatch" style="background:#f4f6fa;border:1px solid #bac7d5"></i>0%</span><span><i class="swatch" style="background:${positiveColor}"></i>${signed(bound)}%</span>`;
 let selectedRows=rows;
-function layout(height){return {height,margin:{l:140,r:60,t:15,b:55},paper_bgcolor:'white',plot_bgcolor:'white',font:{family:'system-ui, sans-serif',size:13,color:'#172b46'},showlegend:false,xaxis:{zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e5ebf2',automargin:true},yaxis:{automargin:true}};}
-function empty(id,message){Plotly.purge(id);document.getElementById(id).innerHTML='';const p=document.createElement('p');p.className='empty';p.textContent=message;document.getElementById(id).appendChild(p);}
-function clearEmpty(id){document.getElementById(id).querySelectorAll('.empty').forEach(el=>el.remove());}
-function drawBars(id,data,categories,values,custom,height){
- if(!data.length){empty(id,'沒有符合條件的 ETF');return;}
- clearEmpty(id);
- const base=layout(height);base.yaxis.autorange='reversed';base.xaxis.title={text:'加權 RS 分數（0 = SPY）'};
- base.xaxis.range=[Math.min(0,...values)*1.24,Math.max(0,...values)*1.24];
- if(values.every(v=>v===0))base.xaxis.range=[-1,1];
- if(data.length===1)base.yaxis.range=[0.9,-0.9];
- return Plotly.react(id,[{type:'bar',orientation:'h',y:categories,x:values,customdata:custom,marker:{color:values.map(v=>v>=0?positiveColor:negativeColor)},text:values.map(signed),textposition:'outside',cliponaxis:false,hovertemplate:'%{customdata}<br>RS 分數：%{x:.2f}<extra></extra>'}],base,config);
+function layout(height){return {height,margin:{l:145,r:55,t:10,b:50},paper_bgcolor:'white',plot_bgcolor:'white',font:{family:'system-ui, sans-serif',size:13,color:'#182b45'},showlegend:false,xaxis:{zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e7edf3',automargin:true},yaxis:{automargin:true}};}
+function empty(id,message){Plotly.purge(id);document.getElementById(id).innerHTML=`<p class="empty">${message}</p>`;}
+function drawRanking(){
+ const order=document.getElementById('order').value,category=document.getElementById('category').value;
+ const query=document.getElementById('search').value.toLowerCase().trim();
+ selectedRows=rows.filter(r=>(!category||r.category===category)&&[r.ticker,r.name,r.exposure,r.category].join(' ').toLowerCase().includes(query));
+ const sorted=[...selectedRows].sort((a,b)=>(order==='bottom'?a.rs_score-b.rs_score:b.rs_score-a.rs_score)||a.ticker.localeCompare(b.ticker));
+ const shown=sorted.slice(0,20),positive=selectedRows.filter(r=>r.rs_score>0).length;
+ document.getElementById('count').textContent=selectedRows.length;
+ document.getElementById('positive').textContent=selectedRows.length?`${(100*positive/selectedRows.length).toFixed(0)}%`:'—';
+ document.getElementById('positive-note').textContent=`${positive} / ${selectedRows.length} 檔`;
+ const leader=[...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)[0],laggard=[...selectedRows].sort((a,b)=>a.rs_score-b.rs_score)[0];
+ document.getElementById('leader').textContent=leader?.ticker||'—';
+ document.getElementById('leader-note').textContent=leader?`${leader.name} · ${signed(leader.rs_score)}`:'沒有符合的 ETF';
+ document.getElementById('laggard').textContent=laggard?.ticker||'—';
+ document.getElementById('laggard-note').textContent=laggard?`${laggard.name} · ${signed(laggard.rs_score)}`:'沒有符合的 ETF';
+ document.getElementById('ranking-caption').textContent=`符合條件 ${selectedRows.length} 檔，圖上顯示${order==='bottom'?'最弱':'最強'} ${shown.length} 檔；完整清單在「更多資訊」裡。`;
+ for(const row of document.querySelectorAll('#rankings tbody tr, #assessment tbody tr, #momentum tbody tr'))row.hidden=row.cells[0].textContent!=='SPY'&&!selectedRows.some(r=>r.ticker===row.cells[0].textContent);
+ if(!shown.length){empty('ranking-chart','找不到符合條件的 ETF，請更換搜尋文字或類別。');return;}
+ const values=shown.map(r=>r.rs_score),bound=Math.max(1,...values.map(Math.abs));
+ const base=layout(Math.max(360,shown.length*32+75));base.yaxis.autorange='reversed';base.xaxis.title={text:'相對 SPY 強弱分數（0 代表和 SPY 一樣）'};base.xaxis.range=[-bound*1.24,bound*1.24];
+ Plotly.react('ranking-chart',[{type:'bar',orientation:'h',y:shown.map(r=>safe(`${r.ticker} · ${r.name}`)),x:values,customdata:shown.map(r=>safe(`${r.category} · 全體排名 ${r.rs_rank}%`)),marker:{color:values.map(v=>v>=0?positiveColor:negativeColor)},text:values.map(signed),textposition:'outside',cliponaxis:false,hovertemplate:'%{customdata}<br>相對 SPY 分數：%{x:.2f}<extra></extra>'}],base,config);
+ updateHistoryOptions();
 }
-function renderTrend(){
- const ticker=document.getElementById('ticker').value, values=payload.trend.series[ticker];
- if(!values){empty('trend-chart',selectedRows.length?'沒有可用走勢資料':'沒有符合條件的 ETF');return;}
- clearEmpty('trend-chart');
- const row=rows.find(r=>r.ticker===ticker);const dates=payload.trend.dates;
- const base=layout(370);base.margin.l=65;base.showlegend=true;base.legend={orientation:'h',y:1.15};
- const tickCount=window.innerWidth<600?3:6;
- const ticks=Array.from({length:tickCount},(_,i)=>dates[Math.round(i*(dates.length-1)/(tickCount-1))]);
- base.xaxis={type:'date',tickvals:ticks,tickformat:'%Y-%m-%d',tickangle:0,title:{text:'美股交易日期'},range:[dates[0],dates.at(-1)],gridcolor:'#e5ebf2'};
- base.yaxis={title:{text:'相對 SPY 指數（起點100）'},gridcolor:'#e5ebf2',zeroline:false,automargin:true};
- return Plotly.react('trend-chart',[
- {type:'scatter',mode:'lines',name:safe(ticker+' '+row.name),x:dates,y:values,line:{color:positiveColor,width:2},hovertemplate:'%{x|%Y-%m-%d}<br>相對強度：%{y:.2f}<extra></extra>'},
- {type:'scatter',mode:'lines',name:'SPY 基準 100',x:[dates[0],dates.at(-1)],y:[100,100],line:{color:'#52657c',width:1.5,dash:'dash'},hoverinfo:'skip'}],base,config);
-}
-async function filter(){
- const c=document.getElementById('category').value,q=document.getElementById('search').value.toLowerCase().trim(),strong=document.getElementById('strong').checked;
- const liquid=document.getElementById('liquid').checked;
- selectedRows=rows.filter(r=>(!liquid||r.liquidity_status==='成交額達門檻')&&(!c||r.category===c)&&[r.ticker,r.name,r.exposure,r.category].join(' ').toLowerCase().includes(q)&&(!strong||r.rs_score>0));
- const tickers=new Set(selectedRows.map(r=>r.ticker));
- for(const row of document.querySelectorAll('#rankings tbody tr, #assessment tbody tr, #momentum tbody tr'))row.hidden=row.cells[0].textContent!=='SPY'&&!tickers.has(row.cells[0].textContent);
- const count=selectedRows.length,pos=selectedRows.filter(r=>r.rs_score>0).length;
- document.getElementById('count').textContent=count;
- document.getElementById('positive').textContent=count?`${(100*pos/count).toFixed(1)}%`:'—';
- document.getElementById('positive-note').textContent=`${pos} / ${count} 檔`;
- document.getElementById('median').textContent=count?signed(median(selectedRows.map(r=>r.rs_score))):'—';
- const strongest=[...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)[0];
- document.getElementById('leader').textContent=strongest?strongest.ticker:'—';
- document.getElementById('leader-note').textContent=strongest?`${strongest.name} · RS ${signed(strongest.rs_score)}`:'沒有符合條件的 ETF';
- const ascending=document.getElementById('order').value==='bottom',limit=document.getElementById('limit').value;
- const sorted=[...selectedRows].sort((a,b)=>(ascending?a.rs_score-b.rs_score:b.rs_score-a.rs_score)||a.ticker.localeCompare(b.ticker));
- const shown=limit==='all'?sorted:sorted.slice(0,Number(limit));
- document.getElementById('ranking-caption').textContent=`目前篩選 ${count} 檔，顯示${ascending?'最弱':'最強'} ${shown.length} 檔；長條保留正負與零基準。`;
- await drawBars('ranking-chart',shown,shown.map(r=>safe(r.ticker+' '+r.name)),shown.map(r=>r.rs_score),shown.map(r=>safe(`${r.ticker} ${r.name} · ${r.category} · 全母體 PR ${r.rs_rank}`)),Math.max(340,shown.length*32+80));
- const grouped=new Map();for(const r of selectedRows){if(!grouped.has(r.category))grouped.set(r.category,[]);grouped.get(r.category).push(r.rs_score);}
- const groups=[...grouped].map(([category,values])=>({category,count:values.length,score:median(values)})).sort((a,b)=>b.score-a.score);
- await drawBars('category-chart',groups,groups.map(g=>safe(`${g.category}（${g.count}檔）`)),groups.map(g=>g.score),groups.map(g=>safe(`${g.category} · ${g.count} 檔 · 中位數`)),Math.max(340,groups.length*37+80));
- document.getElementById('heatmap-caption').textContent=`顯示同一組 ${shown.length} 檔 ETF；藍色為跑贏、橙色為落後 SPY，單位 %。色階固定於 ±${bound.toFixed(1)}%。游標移入可讀取精確值。`;
- if(shown.length){clearEmpty('heatmap-chart');const base=layout(Math.max(340,shown.length*30+90));base.margin.l=110;base.margin.r=20;base.margin.b=35;base.yaxis.autorange='reversed';
- base.xaxis={side:'top',tickangle:0,automargin:true};
- await Plotly.react('heatmap-chart',[{type:'heatmap',x:['3月<br>63日','6月<br>126日','9月<br>189日','12月<br>252日'],y:shown.map(r=>safe(r.ticker+' '+r.name)),z:shown.map(r=>periods.map(p=>r[`relative_${p}d_pct`])),zmin:-bound,zmax:bound,zmid:0,colorscale:[[0,negativeColor],[0.5,'#f4f6fa'],[1,positiveColor]],showscale:false,hovertemplate:'%{y}<br>%{x}<br>相對 SPY：%{z:.2f}%<extra></extra>',xgap:2,ygap:2}],base,config);
- }else empty('heatmap-chart','沒有符合條件的 ETF');
- const select=document.getElementById('ticker'),previous=select.value;select.replaceChildren();
- for(const r of [...selectedRows].sort((a,b)=>b.rs_score-a.rs_score)){const option=document.createElement('option');option.value=r.ticker;option.textContent=`${r.ticker} · ${r.name}`;select.appendChild(option);}
- if(tickers.has(previous))select.value=previous;
- await renderTrend();
- const historySelect=document.getElementById('history-ticker'),previousHistory=historySelect.value;
- historySelect.replaceChildren();for(const r of selectedRows){const option=document.createElement('option');option.value=r.ticker;option.textContent=r.ticker+' · '+r.name;historySelect.appendChild(option);}
- if(tickers.has(previousHistory))historySelect.value=previousHistory;
- await renderHistory();
+function updateHistoryOptions(){
+ const select=document.getElementById('history-ticker'),previous=select.value;select.replaceChildren();
+ for(const r of selectedRows){const option=document.createElement('option');option.value=r.ticker;option.textContent=`${r.ticker} · ${r.name}`;select.appendChild(option);}
+ if(selectedRows.some(r=>r.ticker===previous))select.value=previous;
+ if(document.getElementById('moreInfo').open)renderHistory();
 }
 function renderHistory(){
- const ticker=document.getElementById('history-ticker').value;const end=payload.trend.dates.at(-1);if(!end){empty('history-chart','沒有可用歷史快照');return;}
- const endDate=new Date(end+'T00:00:00Z'),cutoffDate=new Date(endDate);const day=cutoffDate.getUTCDate();cutoffDate.setUTCDate(1);cutoffDate.setUTCMonth(cutoffDate.getUTCMonth()-3);const lastDay=new Date(Date.UTC(cutoffDate.getUTCFullYear(),cutoffDate.getUTCMonth()+1,0)).getUTCDate();cutoffDate.setUTCDate(Math.min(day,lastDay));const cutoff=cutoffDate.toISOString().slice(0,10);
+ const ticker=document.getElementById('history-ticker').value,end=payload.trend.dates.at(-1);
+ if(!end||!ticker){empty('history-chart','選擇標的後即可查看歷史分數。');return;}
+ const endDate=new Date(end+'T00:00:00Z'),cutoffDate=new Date(endDate),day=cutoffDate.getUTCDate();cutoffDate.setUTCDate(1);cutoffDate.setUTCMonth(cutoffDate.getUTCMonth()-3);const lastDay=new Date(Date.UTC(cutoffDate.getUTCFullYear(),cutoffDate.getUTCMonth()+1,0)).getUTCDate();cutoffDate.setUTCDate(Math.min(day,lastDay));const cutoff=cutoffDate.toISOString().slice(0,10);
  const data=payload.history.filter(r=>r.ticker===ticker&&r.data_date>=cutoff&&r.data_date<=end).sort((a,b)=>a.data_date.localeCompare(b.data_date));
- if(!data.length){empty('history-chart','沒有可用歷史快照');return;}
- clearEmpty('history-chart');const base=layout(360);base.margin={l:65,r:20,t:45,b:60};base.showlegend=true;base.legend={orientation:'h',y:1.15};
- const dates=data.map(r=>r.data_date),n=Math.min(dates.length,window.innerWidth<600?3:6);
- const ticks=n===1?[dates[0]]:Array.from({length:n},(_,i)=>dates[Math.round(i*(dates.length-1)/(n-1))]);
- base.xaxis={title:{text:'快照資料日'},type:'date',tickangle:0,tickvals:ticks,tickformat:'%Y-%m-%d',range:[cutoff,end]};base.yaxis={title:{text:'加權 RS 分數'},zeroline:true,gridcolor:'#e5ebf2'};
- const lookup=new Map(data.map(r=>[r.data_date,r]));const sessions=payload.trend.dates.filter(date=>date>=cutoff&&date<=end);
- const line={type:'scatter',mode:'lines',name:'RS走勢',showlegend:false,x:sessions,y:sessions.map(date=>lookup.get(date)?.rs_score??null),connectgaps:false,line:{color:positiveColor,width:2},hoverinfo:'skip'};
- return Plotly.react('history-chart',[line,...['observed','reconstructed'].map(kind=>{const group=data.filter(r=>r.snapshot_kind===kind);return {type:'scatter',mode:'markers',name:kind==='observed'?'實際快照':'重建歷史',x:group.map(r=>r.data_date),y:group.map(r=>r.rs_score),marker:{color:kind==='observed'?positiveColor:'#758537',size:8,symbol:kind==='observed'?'circle':'circle-open'},customdata:group.map(r=>[r.universe_id,r.eligible_id]),hovertemplate:'%{x|%Y-%m-%d}<br>RS：%{y:.2f}<br>清單版本：%{customdata[0]}<br>合格母體：%{customdata[1]}<extra>%{fullData.name}</extra>'};})],base,config);
-}
-function sortMomentum(column,button){
- const table=document.getElementById('momentum'),header=button.closest('th');
- const ascending=header.getAttribute('aria-sort')!=='ascending';
- for(const th of table.querySelectorAll('thead th'))th.setAttribute('aria-sort','none');
- header.setAttribute('aria-sort',ascending?'ascending':'descending');
- const label=button.childNodes[0].textContent.trim();
- button.setAttribute('aria-label',`依${label}${ascending?'降':'升'}冪排序`);
- button.querySelector('span').textContent=ascending?'↑':'↓';
- const rows=[...table.tBodies[0].rows];
- const key=row=>row.cells[column].textContent.trim();
- const missing=value=>!value||['資料不足','—','未知'].includes(value);
- const numeric=value=>{const number=Number(value.replaceAll(',','').replaceAll('%','').replace(/^\+/,''));return value!==''&&Number.isFinite(number)?number:null;};
- rows.sort((left,right)=>{
-  const a=key(left),b=key(right),am=missing(a),bm=missing(b);
-  if(am||bm)return am===bm?left.cells[0].textContent.localeCompare(right.cells[0].textContent):(am?1:-1);
-  const an=numeric(a),bn=numeric(b);let order;
-  if(an!==null&&bn!==null)order=an-bn;
-  else order=a.localeCompare(b,'zh-Hant',{numeric:true,sensitivity:'base'});
-  return (ascending?order:-order)||left.cells[0].textContent.localeCompare(right.cells[0].textContent);
- });
- table.tBodies[0].append(...rows);
+ if(!data.length){empty('history-chart','目前沒有可顯示的歷史快照。');return;}
+ const base=layout(340);base.margin={l:65,r:20,t:25,b:55};base.showlegend=true;base.legend={orientation:'h',y:1.15};base.xaxis={title:{text:'日期'},type:'date',range:[cutoff,end],tickformat:'%Y-%m-%d'};base.yaxis={title:{text:'相對 SPY 強弱分數'},zeroline:true,gridcolor:'#e7edf3'};
+ const dates=data.map(r=>r.data_date);
+ Plotly.react('history-chart',['observed','reconstructed'].map(kind=>{const group=data.filter(r=>r.snapshot_kind===kind);return {type:'scatter',mode:'lines+markers',name:kind==='observed'?'實際保存':'早期重建',x:group.map(r=>r.data_date),y:group.map(r=>r.rs_score),line:{color:kind==='observed'?positiveColor:'#8391a1',dash:kind==='observed'?'solid':'dot'},marker:{symbol:kind==='observed'?'circle':'circle-open',size:7},connectgaps:false,hovertemplate:'%{x|%Y-%m-%d}<br>分數：%{y:.2f}<extra>%{fullData.name}</extra>'};}),base,config);
 }
 function renderForward(){
- const data=payload.forward_validation||[];
- if(!data.length){empty('forward-chart','累積足夠實際快照及後續行情後，這裡會顯示分組結果');return;}
- const buckets=['最低 20%','20–40%','40–60%','60–80%','最高 20%'];
- const horizons=['5 日','21 日','63 日'];
- const base=layout(370);base.margin={l:65,r:25,t:20,b:70};base.barmode='group';
- base.xaxis={title:{text:'快照當日 RS 全母體 PR 分組'},gridcolor:'#e5ebf2'};
- base.yaxis={title:{text:'平均超額報酬（相對 SPY，百分點）'},zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e5ebf2'};
- base.showlegend=true;base.legend={orientation:'h',y:1.15};
- return Plotly.react('forward-chart',horizons.map((horizon,index)=>{const group=buckets.map(bucket=>data.find(row=>row['觀察期間']===horizon&&row['RS排名組別']===bucket));return {type:'bar',name:horizon,x:buckets,y:group.map(row=>row?row['平均相對SPY報酬 %']:null),customdata:group.map(row=>row?[row['樣本數'],row['快照日數'],row['跑贏SPY比例 %']]:null),marker:{color:[positiveColor,'#5682bd','#849cba','#d49a66',negativeColor][index]},hovertemplate:'%{x}<br>平均超額：%{y:.2f}%<br>樣本：%{customdata[0]}<br>快照日：%{customdata[1]}<br>跑贏比例：%{customdata[2]:.1f}%<extra>%{fullData.name}</extra>'};}),base,config);
+ const data=payload.forward_validation||[];if(!data.length){empty('forward-chart','累積足夠實際快照及後續行情後，這裡會顯示結果。');return;}
+ const buckets=['最低 20%','20–40%','40–60%','60–80%','最高 20%'],horizons=['5 日','21 日','63 日'];
+ const base=layout(360);base.margin={l:65,r:20,t:30,b:65};base.barmode='group';base.showlegend=true;base.legend={orientation:'h',y:1.15};base.xaxis={title:{text:'過去排名分組'}};base.yaxis={title:{text:'平均比 SPY 多（少）賺 %'},zeroline:true,gridcolor:'#e7edf3'};
+ Plotly.react('forward-chart',horizons.map(horizon=>{const group=buckets.map(bucket=>data.find(r=>r['觀察期間']===horizon&&r['RS排名組別']===bucket));return {type:'bar',name:horizon,x:buckets,y:group.map(r=>r?r['平均相對SPY報酬 %']:null),customdata:group.map(r=>r?[r['樣本數'],r['快照日數'],r['跑贏SPY比例 %']]:null),hovertemplate:'%{x}<br>平均差距：%{y:.2f}%<br>ETF 數：%{customdata[0]}<br>觀察日期：%{customdata[1]}<br>跑贏比例：%{customdata[2]:.1f}%<extra>%{fullData.name}</extra>'};}),base,config);
+}
+function sortMomentum(column,button){
+ const table=document.getElementById('momentum'),header=button.closest('th'),ascending=header.getAttribute('aria-sort')!=='ascending';
+ for(const th of table.querySelectorAll('thead th'))th.setAttribute('aria-sort','none');header.setAttribute('aria-sort',ascending?'ascending':'descending');
+ const label=button.childNodes[0].textContent.trim();button.setAttribute('aria-label',`依${label}${ascending?'降':'升'}冪排序`);button.querySelector('span').textContent=ascending?'↑':'↓';
+ const key=row=>row.cells[column].textContent.trim(),missing=v=>!v||['資料不足','—','未知'].includes(v);
+ const numeric=v=>{const n=Number(v.replaceAll(',','').replaceAll('%','').replace(/^\+/,''));return v!==''&&Number.isFinite(n)?n:null;};
+ const rows=[...table.tBodies[0].rows];rows.sort((a,b)=>{const x=key(a),y=key(b),xm=missing(x),ym=missing(y);if(xm||ym)return xm===ym?a.cells[0].textContent.localeCompare(b.cells[0].textContent):(xm?1:-1);const xn=numeric(x),yn=numeric(y),cmp=xn!==null&&yn!==null?xn-yn:x.localeCompare(y,'zh-Hant',{numeric:true,sensitivity:'base'});return (ascending?cmp:-cmp)||a.cells[0].textContent.localeCompare(b.cells[0].textContent);});table.tBodies[0].append(...rows);
 }
 document.querySelectorAll('#momentum .sort-button').forEach(button=>button.addEventListener('click',()=>sortMomentum(Number(button.dataset.column),button)));
-let rendering=false,pending=false;
-async function scheduleFilter(){pending=true;if(rendering)return;rendering=true;try{while(pending){pending=false;await filter();}}finally{rendering=false;}}
-for(const id of ['category','search','strong','liquid','order','limit'])document.getElementById(id).addEventListener('input',scheduleFilter);
-document.getElementById('ticker').addEventListener('change',renderTrend);
-document.getElementById('history-ticker').addEventListener('change',renderHistory);
-scheduleFilter();
-renderForward();
-window.addEventListener('resize',scheduleFilter);
+document.getElementById('category').addEventListener('change',drawRanking);document.getElementById('search').addEventListener('input',drawRanking);document.getElementById('order').addEventListener('change',drawRanking);document.getElementById('history-ticker').addEventListener('change',renderHistory);
+document.getElementById('moreInfo').addEventListener('toggle',event=>{if(event.target.open){renderHistory();renderForward();}});
+drawRanking();
 </script>
 </body></html>

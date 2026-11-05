@@ -96,11 +96,12 @@ def test_embedded_chart_data_matches_rankings_and_trend(tmp_path):
     trend = payload['trend']
     assert len(trend['dates']) == 253
     assert trend['dates'][-1] == '2026-09-30'
-    assert trend['series']['DBA'][0] == pytest.approx(100)
-    assert trend['series']['DBA'][-1] == pytest.approx(result.set_index('ticker').loc['DBA', 'rs_line_1y'])
+    assert 'series' not in trend
     assert payload['rows'][0]['rs_score'] == pytest.approx(result.iloc[0].rs_score)
-    for chart in ['ranking-chart', 'category-chart', 'heatmap-chart', 'trend-chart']:
+    for chart in ['ranking-chart', 'history-chart', 'forward-chart']:
         assert f'id="{chart}"' in html
+    for removed in ['category-chart', 'heatmap-chart', 'trend-chart', 'risk-chart', 'correlation-chart']:
+        assert f'id="{removed}"' not in html
     assert 'cdn.plot.ly' not in html.split('<script>')[0]
     assert 'Plotly.react' in html
     momentum=re.search(r'<table[^>]*id="momentum".*?</table>',html,re.S).group(0)
@@ -117,7 +118,7 @@ def test_chart_payload_escapes_script_termination(tmp_path):
     universe = load_universe().query("ticker == 'SPY'").copy()
     universe['name'] = '</script><img src=x onerror=alert(1)>'
     result = universe.assign(data_date='2026-09-30', adjusted_close=100., rs_score=0.,
-        rs_rank=pd.NA, category_rank=pd.NA, outperforms_spy=False, rs_line_1y=100.,
+        rs_rank=pd.NA, category_rank=pd.NA, outperforms_spy=False,
         **{f'relative_{n}d_pct': 0. for n in [63, 126, 189, 252]})
     excluded = pd.DataFrame(columns=list(universe.columns)+['reason'])
     html = write_reports(result, excluded, tmp_path).read_text()
