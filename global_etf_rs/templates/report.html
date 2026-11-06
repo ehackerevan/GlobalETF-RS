@@ -9,6 +9,8 @@
 *{box-sizing:border-box}body{font:16px/1.55 system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:var(--paper);color:var(--ink)}main{max-width:1180px;margin:auto;padding:28px 22px 48px}h1{font-size:clamp(28px,4vw,38px);line-height:1.2;margin:6px 0 10px}h2{font-size:20px;margin:0 0 4px}h3{font-size:17px;margin:18px 0 5px}p{margin:6px 0;line-height:1.6}.eyebrow{font-size:12px;color:var(--blue);font-weight:750;letter-spacing:.1em}.meta,.caption,.note{color:var(--muted);font-size:14px}.caption{margin-bottom:14px}.header{padding:6px 0 18px}.how{margin:12px 0 20px;padding:13px 15px;background:#eaf2fb;border:1px solid #d6e6f5;border-radius:11px}.how strong{display:block}.how span{color:#465b73;font-size:14px}.quality{padding:10px 13px;border-radius:8px}.quality-warning{background:#fff1d9;border-left:4px solid #c76c23}.note{font-size:13px}.controls,.panel,.card{background:white;border:1px solid var(--line);border-radius:12px}.controls{padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 15px}label{font-size:14px}select,input[type=search]{padding:10px 11px;border:1px solid #b9c6d5;border-radius:8px;background:white;color:var(--ink);font:inherit;max-width:100%}select:focus,input:focus{outline:3px solid #285ea824;border-color:var(--blue)}.search{flex:1;min-width:220px}.search input{width:100%}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}.card{padding:15px 17px}.card span{display:block;font-size:13px;color:var(--muted)}.card strong{display:block;font-size:25px;margin:4px 0}.card small{color:var(--muted);font-size:12px}.panel{padding:19px;margin:15px 0}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.legend{display:flex;gap:15px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:10px 0}.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.chart{width:100%;min-height:370px}.scroll-chart{max-height:650px;overflow:auto}.table-wrap{overflow:auto;max-height:600px}table{border-collapse:collapse;white-space:nowrap;width:100%;font-size:13px}th,td{padding:10px;text-align:left;border-bottom:1px solid var(--line)}th{background:#edf2f8;position:sticky;top:0;z-index:1}.sort-button{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;text-align:left;padding:0;cursor:pointer}.sort-button:hover,.sort-button:focus-visible{color:var(--blue);text-decoration:underline}.sort-button span{color:var(--blue);margin-left:3px}tbody tr:hover{background:#f5f8fd}.details{background:white;border:1px solid var(--line);border-radius:12px;margin:15px 0}.details>summary{padding:16px 18px;cursor:pointer;font-weight:720;list-style:none}.details>summary::-webkit-details-marker{display:none}.details>summary:after{content:'＋';float:right;color:var(--blue)}.details[open]>summary:after{content:'－'}.details-body{padding:0 18px 18px}.subsection{padding-top:14px;margin-top:14px;border-top:1px solid var(--line)}.empty{padding:32px;text-align:center;color:var(--muted)}a{color:var(--blue)}.download{line-height:2}.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:20px}
 @media(max-width:760px){main{padding:20px 12px 36px}.cards{grid-template-columns:1fr 1fr}.panel{padding:14px}.controls{align-items:stretch}.controls label{flex:1}.search{min-width:100%}.chart{min-height:300px}.panel-head{display:block}}
 @media print{body{background:white}.controls,.modebar{display:none}.details:not([open]){display:none}.table-wrap,.scroll-chart{max-height:none}.panel,.card{break-inside:avoid}}
+.change-tabs{display:flex;gap:4px;border:1px solid var(--line);background:#f4f6f8;padding:3px;border-radius:9px}.change-tabs button{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:7px 12px;font-weight:650}.change-tabs button[aria-selected=true]{background:#fff;color:var(--blue);box-shadow:0 1px 3px #172b461a}.change-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.change-side{border:1px solid var(--line);border-radius:10px;padding:12px 14px}.change-side h3{margin:0 0 7px;font-size:15px}.change-list{list-style:none;padding:0;margin:0}.change-list li{display:flex;align-items:center;gap:9px;border-top:1px solid #edf1f5;padding:8px 0;min-height:45px}.change-rank{width:21px;color:#8290a1;font-size:12px;font-weight:750}.change-asset{display:flex;flex:1;align-items:baseline;gap:7px;min-width:0}.change-asset b{font-size:13px}.change-asset small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.change-value{font-size:13px;white-space:nowrap}.change-value.positive{color:var(--blue)}.change-value.negative{color:var(--red)}.change-empty{font-size:13px;color:var(--muted)}
+@media(max-width:600px){.change-grid{grid-template-columns:1fr}.change-tabs button{padding:7px 10px}}
 </style>
 <script>{{PLOTLY}}</script>
 </head>
@@ -20,6 +22,13 @@
 <p class="quality {{QUALITY_CLASS}}">資料狀態：{{QUALITY_LABEL}}　·　更新時間：{{CREATED_AT}}</p>
 <div class="how"><strong>怎麼看：分數在 0 以上，代表這檔 ETF 最近跑贏 SPY；低於 0，代表落後 SPY。</strong><span>分數用來比較強弱，不是買進或賣出訊號。</span></div>
 </header>
+<section class="panel" aria-labelledby="change-title">
+<div class="panel-head"><div><h2 id="change-title">短期 RS 分數變化排行</h2><p class="caption">和指定交易日的實際快照相比；顯示分數上升、下降各前五名。</p></div>
+<div class="change-tabs" role="tablist" aria-label="RS分數比較期間"><button type="button" role="tab" aria-selected="true" data-window="1">1日</button><button type="button" role="tab" aria-selected="false" data-window="3">3日</button><button type="button" role="tab" aria-selected="false" data-window="5">5日</button><button type="button" role="tab" aria-selected="false" data-window="10">10日</button></div></div>
+<p class="note">這裡比較的是 RS 分數變化（分），不是 ETF 價格漲跌幅。</p>
+<p class="note" id="change-caption" aria-live="polite"></p>
+<div class="change-grid"><div class="change-side"><h3>分數上升</h3><ol id="change-gainers" class="change-list"></ol></div><div class="change-side"><h3>分數下降</h3><ol id="change-decliners" class="change-list"></ol></div></div>
+</section>
 <div class="controls" aria-label="篩選 ETF">
 <label>類別<br><select id="category"><option value="">全部類別</option>{{OPTIONS}}</select></label>
 <label class="search">搜尋代碼或名稱<br><input type="search" id="search" placeholder="例如：黃金、印度、債券" aria-label="搜尋代碼或名稱"></label>
@@ -64,6 +73,7 @@ const positiveColor='#285ea8',negativeColor='#c76c23';
 const config={responsive:true,displaylogo:false,scrollZoom:false,modeBarButtonsToRemove:['lasso2d','select2d'],toImageButtonOptions:{format:'png',scale:2}};
 const safe=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const signed=value=>(value>0?'+':'')+value.toFixed(2);
+const rsChanges=payload.rs_changes||{};
 let selectedRows=rows;
 function layout(height){return {height,margin:{l:145,r:55,t:10,b:50},paper_bgcolor:'white',plot_bgcolor:'white',font:{family:'system-ui, sans-serif',size:13,color:'#182b45'},showlegend:false,xaxis:{zeroline:true,zerolinecolor:'#52657c',gridcolor:'#e7edf3',automargin:true},yaxis:{automargin:true}};}
 function empty(id,message){Plotly.purge(id);document.getElementById(id).innerHTML=`<p class="empty">${message}</p>`;}
@@ -119,9 +129,19 @@ function sortMomentum(column,button){
  const numeric=v=>{const n=Number(v.replaceAll(',','').replaceAll('%','').replace(/^\+/,''));return v!==''&&Number.isFinite(n)?n:null;};
  const rows=[...table.tBodies[0].rows];rows.sort((a,b)=>{const x=key(a),y=key(b),xm=missing(x),ym=missing(y);if(xm||ym)return xm===ym?a.cells[0].textContent.localeCompare(b.cells[0].textContent):(xm?1:-1);const xn=numeric(x),yn=numeric(y),cmp=xn!==null&&yn!==null?xn-yn:x.localeCompare(y,'zh-Hant',{numeric:true,sensitivity:'base'});return (ascending?cmp:-cmp)||a.cells[0].textContent.localeCompare(b.cells[0].textContent);});table.tBodies[0].append(...rows);
 }
+function renderChangeRankings(windowSize){
+ const data=rsChanges[String(windowSize)],caption=document.getElementById('change-caption');
+ const renderList=(target,items,emptyText,sign)=>{const element=document.getElementById(target);element.innerHTML=items.length?items.map((row,index)=>`<li><span class="change-rank">${index+1}</span><span class="change-asset"><b>${safe(row.ticker)}</b><small>${safe(row.name)}</small></span><strong class="change-value ${sign}">${signed(row.change)} 分</strong></li>`).join(''):`<li class="change-empty">${emptyText}</li>`;};
+ if(!data||!data.available){caption.textContent=`尚無 ${windowSize} 個交易日前的實際快照，累積資料後會顯示排行。`;renderList('change-gainers',[],'目前沒有可比較資料','positive');renderList('change-decliners',[],'目前沒有可比較資料','negative');return;}
+ caption.textContent=`比較日期：${data.compare_date}　·　可比較 ${data.compared_count} 檔 ETF　·　只使用實際保存的快照`;
+ renderList('change-gainers',data.gainers,'這段期間沒有 RS 分數上升的標的','positive');
+ renderList('change-decliners',data.decliners,'這段期間沒有 RS 分數下降的標的','negative');
+}
+document.querySelectorAll('[data-window]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-window]').forEach(tab=>tab.setAttribute('aria-selected',String(tab===button)));renderChangeRankings(Number(button.dataset.window));}));
 document.querySelectorAll('#momentum .sort-button').forEach(button=>button.addEventListener('click',()=>sortMomentum(Number(button.dataset.column),button)));
 document.getElementById('category').addEventListener('change',drawRanking);document.getElementById('search').addEventListener('input',drawRanking);document.getElementById('order').addEventListener('change',drawRanking);document.getElementById('history-ticker').addEventListener('change',renderHistory);
 document.getElementById('moreInfo').addEventListener('toggle',event=>{if(event.target.open){renderHistory();renderForward();}});
 drawRanking();
+renderChangeRankings(1);
 </script>
 </body></html>

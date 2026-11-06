@@ -44,7 +44,7 @@ def _trend_payload(prices, result):
     return {"dates": frame.index.strftime("%Y-%m-%d").tolist()}
 
 
-def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, forward_validation=None, forward_meta=None):
+def write_reports(result, excluded, output_dir, prices=None, quality=None, history=None, history_meta=None, forward_validation=None, forward_meta=None, rs_changes=None):
     folder = Path(output_dir)
     folder.mkdir(parents=True, exist_ok=True)
     result.to_csv(folder / "rankings.csv", index=False, encoding="utf-8-sig")
@@ -85,7 +85,7 @@ def write_reports(result, excluded, output_dir, prices=None, quality=None, histo
     forward_validation = forward_validation if forward_validation is not None else pd.DataFrame()
     forward_table = forward_validation.to_html(index=False, border=0, table_id='forward-validation', na_rep='—', float_format=lambda value: f'{value:.2f}') if not forward_validation.empty else '<p>尚無已完成觀察期間的實際 RS 快照。</p>'
     forward_meta = forward_meta or {'observed_snapshot_dates': 0, 'evaluated_snapshot_dates': 0}
-    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "history": history_records, "forward_validation": json.loads(forward_validation.to_json(orient='records'))}
+    payload = {"rows": json.loads(result.to_json(orient="records")), "trend": _trend_payload(prices, result), "history": history_records, "forward_validation": json.loads(forward_validation.to_json(orient='records')), "rs_changes": rs_changes or {}}
     data = json.dumps(payload, ensure_ascii=False, allow_nan=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     values = {
         "PLOTLY": get_plotlyjs(), "DATA": data, "TABLE": table,
